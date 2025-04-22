@@ -1,0 +1,10 @@
+// build-logic/build.gradle
+plugins {
+    id('groovy-gradle-plugin') // For Groovy plugins
+}
+
+dependencies {
+    implementation gradleApi() // Allow access to Gradle APIs
+//    implementation libs.android.gradle.plugin // Android Gradle Plugin
+//    implementation libs.kotlin.gradle.plugin // Kotlin Gradle Plugin
+}

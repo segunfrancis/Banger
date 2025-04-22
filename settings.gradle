@@ -1,0 +1,31 @@
+pluginManagement {
+    repositories {
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    includeBuild('build-logic')
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "Wallpaper Downloader"
+include ':app'
+include ':feature:home'
+include ':feature:favourites'
+include ':feature:profile'
+include ':shared:theme'
+include ':data:local'
+include ':data:remote'
+include ':shared:utility'

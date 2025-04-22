@@ -1,0 +1,24 @@
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.ksp)
+    id("kotlin-parcelize")
+    id('shared-dependencies')
+}
+
+android {
+    namespace 'com.segunfrancis.wallpaperdownloader'
+
+    defaultConfig {
+        applicationId "com.segunfrancis.wallpaperdownloader"
+    }
+}
+
+dependencies {
+    implementation(project(":feature:home"))
+    implementation(project(":feature:profile"))
+    implementation(project(":feature:favourites"))
+    implementation(project(":shared:theme"))
+    implementation(project(":data:remote"))
+}

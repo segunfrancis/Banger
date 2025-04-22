@@ -1,0 +1,10 @@
+plugins {
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+    id("shared-dependencies")
+    id("data-dependencies")
+}
+
+android {
+    namespace 'com.segunfrancis.local'
+}

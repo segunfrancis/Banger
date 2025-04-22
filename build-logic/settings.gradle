@@ -1,0 +1,14 @@
+// build-logic/settings.gradle
+rootProject.name = 'build-logic'
+
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    versionCatalogs {
+        libs {
+            from(files("../gradle/libs.versions.toml")) // Reuse your existing version catalog
+        }
+    }
+}
