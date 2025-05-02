@@ -1,9 +1,9 @@
-package com.segunfrancis.home.ui.ui
+package com.segunfrancis.home.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.segunfrancis.home.ui.domain.HomeRepository
-import com.segunfrancis.home.ui.domain.PhotosResponseItem
+import com.segunfrancis.home.domain.HomeRepository
+import com.segunfrancis.remote.PhotosResponseItem
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow

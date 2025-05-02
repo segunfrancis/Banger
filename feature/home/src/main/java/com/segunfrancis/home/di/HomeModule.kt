@@ -1,9 +1,9 @@
-package com.segunfrancis.home.ui.di
+package com.segunfrancis.home.di
 
-import com.segunfrancis.home.ui.domain.HomeApi
-import com.segunfrancis.home.ui.domain.HomeRepository
-import com.segunfrancis.home.ui.domain.HomeRepositoryImpl
-import com.segunfrancis.home.ui.ui.HomeViewModel
+import com.segunfrancis.home.domain.HomeApi
+import com.segunfrancis.home.domain.HomeRepository
+import com.segunfrancis.home.domain.HomeRepositoryImpl
+import com.segunfrancis.home.ui.HomeViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import org.koin.core.module.dsl.singleOf

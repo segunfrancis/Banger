@@ -6,15 +6,17 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.Keep
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -27,8 +29,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.segunfrancis.details.ui.DetailsScreen
 import com.segunfrancis.favourites.ui.FavouriteScreen
-import com.segunfrancis.home.ui.ui.HomeScreen
+import com.segunfrancis.home.ui.HomeScreen
 import com.segunfrancis.profile.ui.ProfileScreen
 import com.segunfrancis.theme.WallpaperDownloaderTheme
 import kotlinx.serialization.Serializable
@@ -54,43 +57,52 @@ fun WallpaperDownloaderApp() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
-    NavigationSuiteScaffold(
-        navigationSuiteItems = {
-            NavMenuItems.entries.forEach { menuItem ->
-                item(
-                    icon = {
-                        Icon(
-                            menuItem.icon,
-                            contentDescription = menuItem.label
-                        )
-                    },
-                    label = { Text(menuItem.label) },
-                    selected = currentDestination?.hierarchy?.any { it.hasRoute(menuItem.route::class) } == true,
-                    onClick = {
-                        navController.navigate(menuItem.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
+
+    Scaffold(modifier = Modifier.fillMaxSize(), bottomBar = {
+        if (currentDestination?.hierarchy?.any { it.hasRoute(AppDestinations.Home::class) } == true
+            || currentDestination?.hierarchy?.any { it.hasRoute(AppDestinations.Favourites::class) } == true
+            || currentDestination?.hierarchy?.any { it.hasRoute(AppDestinations.Profile::class) } == true) {
+            NavigationBar(modifier = Modifier.fillMaxWidth()) {
+                NavMenuItems.entries.forEach { menuItem ->
+                    NavigationBarItem(
+                        icon = {
+                            Icon(
+                                menuItem.icon,
+                                contentDescription = menuItem.label
+                            )
+                        },
+                        label = { Text(menuItem.label) },
+                        selected = currentDestination.hierarchy.any { it.hasRoute(menuItem.route::class) },
+                        onClick = {
+                            navController.navigate(menuItem.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
                             }
-                            launchSingleTop = true
-                            restoreState = true
                         }
-                    }
-                )
+                    )
+                }
             }
         }
-    ) {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            NavHost(
-                navController = navController,
-                startDestination = AppDestinations.Home,
-                modifier = Modifier.padding(innerPadding)
-            ) {
-                composable<AppDestinations.Home> { HomeScreen() }
-                composable<AppDestinations.Profile> { ProfileScreen() }
-                composable<AppDestinations.Favourites> { FavouriteScreen() }
+    }) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = AppDestinations.Home,
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            composable<AppDestinations.Home> {
+                HomeScreen(onPhotoClick = {
+                    navController.navigate(AppDestinations.Details(it))
+                })
             }
+            composable<AppDestinations.Profile> { ProfileScreen() }
+            composable<AppDestinations.Favourites> { FavouriteScreen() }
+            composable<AppDestinations.Details> { DetailsScreen() }
         }
     }
+
 }
 
 @Serializable
@@ -114,4 +126,7 @@ sealed class AppDestinations {
 
     @Serializable
     data object Profile : AppDestinations()
+
+    @Serializable
+    data class Details(val id: String) : AppDestinations()
 }

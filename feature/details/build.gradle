@@ -1,0 +1,16 @@
+plugins {
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.android)
+    id("shared-dependencies")
+    id("data-dependencies")
+}
+
+android {
+    namespace 'com.segunfrancis.details'
+}
+
+dependencies {
+    implementation(project(":shared:theme"))
+    implementation(project(":data:remote"))
+    implementation(project(":shared:utility"))
+}

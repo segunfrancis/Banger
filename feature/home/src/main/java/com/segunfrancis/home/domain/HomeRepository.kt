@@ -1,4 +1,6 @@
-package com.segunfrancis.home.ui.domain
+package com.segunfrancis.home.domain
+
+import com.segunfrancis.remote.PhotosResponseItem
 
 interface HomeRepository {
 
