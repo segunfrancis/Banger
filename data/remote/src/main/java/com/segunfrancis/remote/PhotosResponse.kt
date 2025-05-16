@@ -6,12 +6,12 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class PhotosResponseItem(
     @SerialName("alt_description")
-    val altDescription: String,
+    val altDescription: String?,
     @SerialName("asset_type")
-    val assetType: String,
+    val assetType: String?,
     @SerialName("blur_hash")
     val blurHash: String,
-    val color: String,
+    val color: String?,
     @SerialName("created_at")
     val createdAt: String,
     val description: String?,
@@ -21,7 +21,7 @@ data class PhotosResponseItem(
     val likedByUser: Boolean,
     val likes: Int,
     val links: Links,
-    val slug: String,
+    val slug: String?,
     @SerialName("updated_at")
     val updatedAt: String,
     val urls: Urls,

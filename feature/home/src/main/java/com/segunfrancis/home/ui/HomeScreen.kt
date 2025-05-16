@@ -5,14 +5,21 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
+import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -24,9 +31,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
-import com.segunfrancis.remote.PhotosResponseItem
 import com.segunfrancis.theme.WallpaperDownloaderTheme
-import com.segunfrancis.utility.BlurHashDecoder
+import com.segunfrancis.utility.toTitleCase
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -34,7 +40,6 @@ fun HomeScreen(onPhotoClick: (String) -> Unit) {
     val viewModel = koinViewModel<HomeViewModel>()
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
-    HomeContent(photos = uiState.photos, onPhotoClick = onPhotoClick)
     LaunchedEffect(Unit) {
         viewModel.action.collect {
             when (it) {
@@ -44,40 +49,83 @@ fun HomeScreen(onPhotoClick: (String) -> Unit) {
             }
         }
     }
+    HomeContent(
+        isLoading = uiState.isLoading,
+        onPhotoClick = onPhotoClick,
+        homePhotos = uiState.homePhotos
+    )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeContent(photos: List<PhotosResponseItem>, onPhotoClick:(String) -> Unit) {
+fun HomeContent(
+    isLoading: Boolean,
+    homePhotos: List<Pair<String, List<PhotoItem>>>,
+    onPhotoClick: (String) -> Unit
+) {
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
             text = "Home Screen",
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(24.dp)
         )
-
+        if (isLoading) {
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        }
         LazyVerticalStaggeredGrid(
+            modifier = Modifier,
             columns = StaggeredGridCells.Fixed(2),
             verticalItemSpacing = 8.dp,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(8.dp)
+            contentPadding = PaddingValues(vertical = 8.dp)
         ) {
-            items(photos) { photo ->
-                val bitmap = BlurHashDecoder.decode(
-                    photo.blurHash,
-                    width = photo.width.div(10),
-                    height = photo.height.div(10)
-                )
-                Card(modifier = Modifier, shape = RoundedCornerShape(4.dp), onClick = { onPhotoClick(photo.id) }) {
-                    AsyncImage(
-                        model = photo.urls.thumb,
-                        contentDescription = photo.description,
-                        placeholder = rememberAsyncImagePainter(bitmap),
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
+            homePhotos.forEach { homePhoto ->
+                if (homePhoto.second.isNotEmpty()) {
+                    item(span = StaggeredGridItemSpan.FullLine) {
+                        Column {
+                            Text(
+                                text = homePhoto.first.toTitleCase(),
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(8.dp)
+                            )
+                            HorizontalMultiBrowseCarousel(
+                                modifier = Modifier
+                                    .width(412.dp)
+                                    .height(226.dp),
+                                state = rememberCarouselState(itemCount = { homePhoto.second.size }),
+                                preferredItemWidth = 200.dp,
+                                itemSpacing = 8.dp,
+                                contentPadding = PaddingValues(8.dp)
+                            ) { index ->
+                                val photo = homePhoto.second[index]
+                                PhotoCard(
+                                    modifier = Modifier
+                                        .height(210.dp)
+                                        .maskClip(RoundedCornerShape(8.dp)),
+                                    photo = photo
+                                ) { onPhotoClick(it) }
+                            }
+                        }
+                    }
                 }
             }
         }
+    }
+}
+
+@Composable
+fun PhotoCard(modifier: Modifier = Modifier, photo: PhotoItem, onPhotoClick: (String) -> Unit) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(8.dp),
+        onClick = { onPhotoClick(photo.id) }) {
+        AsyncImage(
+            model = photo.thumb,
+            contentDescription = photo.description,
+            placeholder = rememberAsyncImagePainter(photo.blurHashBitmap),
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
     }
 }
 
@@ -85,6 +133,10 @@ fun HomeContent(photos: List<PhotosResponseItem>, onPhotoClick:(String) -> Unit)
 @Composable
 fun HomeScreenPreview() {
     WallpaperDownloaderTheme {
-        HomeContent(photos = emptyList(), onPhotoClick = {})
+        HomeContent(
+            isLoading = true,
+            homePhotos = emptyList(),
+            onPhotoClick = {}
+        )
     }
 }

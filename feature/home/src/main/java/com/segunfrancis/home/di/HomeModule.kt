@@ -3,6 +3,7 @@ package com.segunfrancis.home.di
 import com.segunfrancis.home.domain.HomeApi
 import com.segunfrancis.home.domain.HomeRepository
 import com.segunfrancis.home.domain.HomeRepositoryImpl
+import com.segunfrancis.home.domain.HomeUseCase
 import com.segunfrancis.home.ui.HomeViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -23,6 +24,8 @@ val homeModule = module {
     }
 
     singleOf(::HomeRepositoryImpl) bind HomeRepository::class
+
+    singleOf(::HomeUseCase)
 
     viewModelOf(::HomeViewModel)
 }
