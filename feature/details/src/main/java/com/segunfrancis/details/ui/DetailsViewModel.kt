@@ -23,8 +23,11 @@ class DetailsViewModel(
         MutableSharedFlow(onBufferOverflow = BufferOverflow.DROP_OLDEST, extraBufferCapacity = 1)
     val action: SharedFlow<DetailsActions> = _action.asSharedFlow()
 
-    var photoDetailsState: MutableStateFlow<PhotosResponseItem?> = MutableStateFlow(null)
+    var uiState: MutableStateFlow<DetailsUiState> = MutableStateFlow(DetailsUiState.Loading)
         private set
+
+    private var photosResponseItem: PhotosResponseItem? = null
+    private var photoId: String = ""
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         _action.tryEmit(DetailsActions.ShowMessage(throwable.localizedMessage))
@@ -32,34 +35,39 @@ class DetailsViewModel(
 
     init {
         savedStateHandle.get<String>("id")?.let {
+            photoId = it
             getPhotoDetails(it)
         }
     }
 
-    private fun getPhotoDetails(id: String) {
+    fun getPhotoDetails(id: String = photoId) {
         viewModelScope.launch(exceptionHandler) {
+            uiState.update { DetailsUiState.Loading }
             repository.getPhotoDetails(id)
                 .onSuccess { result ->
-                    photoDetailsState.update { result }
+                    photosResponseItem = result
+                    uiState.update { DetailsUiState.Content(result) }
                 }
-                .onFailure {
-                    _action.tryEmit(DetailsActions.ShowMessage(it.localizedMessage))
+                .onFailure { error ->
+                    uiState.update { DetailsUiState.Error(error.localizedMessage) }
                 }
         }
     }
 
     fun downloadImage() {
         viewModelScope.launch(exceptionHandler) {
-            photoDetailsState.value?.links?.downloadLocation?.let { downloadLocation ->
-                repository.downloadImage(downloadLocation)
-                    .onSuccess {
-                        _action.tryEmit(DetailsActions.ShowMessage("Download Location: ${it?.path}"))
-                        val id = photoDetailsState.value?.id.orEmpty()
-                        repository.trackDownload(id)
-                    }
-                    .onFailure {
-                        _action.tryEmit(DetailsActions.ShowMessage(it.localizedMessage))
-                    }
+            uiState.value.run {
+                photosResponseItem?.links?.downloadLocation?.let { downloadLocation ->
+                    repository.downloadImage(downloadLocation)
+                        .onSuccess {
+                            _action.tryEmit(DetailsActions.ShowMessage("Download Location: ${it?.path}"))
+                            val id = photosResponseItem?.id.orEmpty()
+                            repository.trackDownload(id)
+                        }
+                        .onFailure {
+                            _action.tryEmit(DetailsActions.ShowMessage(it.localizedMessage))
+                        }
+                }
             }
         }
     }
@@ -67,4 +75,10 @@ class DetailsViewModel(
 
 sealed class DetailsActions {
     data class ShowMessage(val message: String?) : DetailsActions()
+}
+
+sealed class DetailsUiState {
+    data object Loading : DetailsUiState()
+    data class Content(val photosResponseItem: PhotosResponseItem) : DetailsUiState()
+    data class Error(val message: String?) : DetailsUiState()
 }

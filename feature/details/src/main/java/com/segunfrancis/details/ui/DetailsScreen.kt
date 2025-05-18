@@ -24,27 +24,30 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
 import com.segunfrancis.remote.Links
@@ -62,7 +65,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun DetailsScreen() {
     val viewModel = koinViewModel<DetailsViewModel>()
-    val photoDetail by viewModel.photoDetailsState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -71,28 +74,46 @@ fun DetailsScreen() {
             viewModel.downloadImage()
         }
     }
-    DetailsContent(photoDetail = photoDetail, onAction = {
-        when (it) {
-            DetailsScreenActions.OnDownload -> {
-                if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-                    if (ContextCompat.checkSelfPermission(
-                            context,
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE
-                        ) == PackageManager.PERMISSION_GRANTED
-                    ) {
-                        viewModel.downloadImage()
-                    } else {
-                        launcher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    }
-                } else {
-                    viewModel.downloadImage()
-                }
-            }
+    when (uiState) {
+        is DetailsUiState.Content -> {
+            DetailsContent(
+                photoDetail = (uiState as DetailsUiState.Content).photosResponseItem,
+                onAction = {
+                    when (it) {
+                        DetailsScreenActions.OnDownload -> {
+                            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                                if (ContextCompat.checkSelfPermission(
+                                        context,
+                                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                                    ) == PackageManager.PERMISSION_GRANTED
+                                ) {
+                                    viewModel.downloadImage()
+                                } else {
+                                    launcher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                                }
+                            } else {
+                                viewModel.downloadImage()
+                            }
+                        }
 
-            DetailsScreenActions.OnFavourite -> {}
-            DetailsScreenActions.OnShare -> {}
+                        DetailsScreenActions.OnFavourite -> {}
+                        DetailsScreenActions.OnShare -> {}
+                    }
+                }
+            )
         }
-    })
+
+        is DetailsUiState.Error -> {
+            DetailsError(error = (uiState as DetailsUiState.Error).message) {
+                viewModel.getPhotoDetails()
+            }
+        }
+
+        DetailsUiState.Loading -> {
+            DetailsLoader()
+        }
+    }
+
     LaunchedEffect(Unit) {
         viewModel.action.collect {
             when (it) {
@@ -199,8 +220,23 @@ fun DetailsContent(photoDetail: PhotosResponseItem?, onAction: (DetailsScreenAct
                         style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier.padding(horizontal = 16.dp)
                     )
-                    Spacer(Modifier.height(16.dp))
                 }
+                photoDetail.altDescription?.let { altDescription ->
+                    if (photo.description == null) {
+                        Text(
+                            text = "Description",
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = altDescription,
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                    }
+                }
+                Spacer(Modifier.height(16.dp))
             },
             content = {
                 AsyncImage(
@@ -215,6 +251,37 @@ fun DetailsContent(photoDetail: PhotosResponseItem?, onAction: (DetailsScreenAct
                     placeholder = rememberAsyncImagePainter(blurBitmap)
                 )
             })
+    }
+}
+
+@Composable
+@Preview
+fun DetailsLoader() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(180.dp),
+            strokeWidth = 8.dp,
+            strokeCap = StrokeCap.Round
+        )
+    }
+}
+
+@Composable
+fun DetailsError(error: String?, onRetryClick: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = error.orEmpty(), style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(24.dp))
+        Button(onClick = { onRetryClick() }) {
+            Text(text = "Retry")
+        }
     }
 }
 

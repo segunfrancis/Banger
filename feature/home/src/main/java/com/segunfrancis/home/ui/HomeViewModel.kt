@@ -64,15 +64,23 @@ sealed class HomeActions {
 
 data class PhotoItem(
     val id: String,
-    val description: String?,
-    val blurHash: String,
     val thumb: String,
+    val blurHash: String,
+    val description: String?,
+    val altDescription: String?,
     val blurHashBitmap: Bitmap?
 )
 
 fun HomePhoto.toPhotoItem(): PhotoItem {
     return with(this) {
-        PhotoItem(id, description, blurHash, thumb, blurHashBitmap)
+        PhotoItem(
+            id = id,
+            thumb = thumb,
+            blurHash = blurHash,
+            description = description,
+            altDescription = altDescription,
+            blurHashBitmap = blurHashBitmap
+        )
     }
 }
 
