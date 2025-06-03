@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -57,6 +58,7 @@ import com.segunfrancis.remote.Social
 import com.segunfrancis.remote.Urls
 import com.segunfrancis.remote.User
 import com.segunfrancis.remote.UserLinks
+import com.segunfrancis.theme.R
 import com.segunfrancis.theme.WallpaperDownloaderTheme
 import com.segunfrancis.utility.BlurHashDecoder
 import kotlinx.coroutines.launch
@@ -74,44 +76,42 @@ fun DetailsScreen() {
             viewModel.downloadImage()
         }
     }
-    when (uiState) {
-        is DetailsUiState.Content -> {
-            DetailsContent(
-                photoDetail = (uiState as DetailsUiState.Content).photosResponseItem,
-                onAction = {
-                    when (it) {
-                        DetailsScreenActions.OnDownload -> {
-                            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-                                if (ContextCompat.checkSelfPermission(
-                                        context,
-                                        Manifest.permission.WRITE_EXTERNAL_STORAGE
-                                    ) == PackageManager.PERMISSION_GRANTED
-                                ) {
-                                    viewModel.downloadImage()
-                                } else {
-                                    launcher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                                }
-                            } else {
+    if (uiState.isLoading) {
+        DetailsLoader()
+    }
+    uiState.detailsError?.let {
+        DetailsError(error = it) { viewModel.getPhotoDetails() }
+    }
+    uiState.photosResponseItem?.let { photosResponseItem ->
+        DetailsContent(
+            photoDetail = photosResponseItem,
+            isFavourite = uiState.isFavourite,
+            onAction = {
+                when (it) {
+                    DetailsScreenActions.OnDownload -> {
+                        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                            if (ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                                ) == PackageManager.PERMISSION_GRANTED
+                            ) {
                                 viewModel.downloadImage()
+                            } else {
+                                launcher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                             }
+                        } else {
+                            viewModel.downloadImage()
                         }
-
-                        DetailsScreenActions.OnFavourite -> {}
-                        DetailsScreenActions.OnShare -> {}
                     }
+
+                    DetailsScreenActions.OnFavourite -> {
+                        viewModel.addPhotoToFavourite()
+                    }
+
+                    DetailsScreenActions.OnShare -> {}
                 }
-            )
-        }
-
-        is DetailsUiState.Error -> {
-            DetailsError(error = (uiState as DetailsUiState.Error).message) {
-                viewModel.getPhotoDetails()
             }
-        }
-
-        DetailsUiState.Loading -> {
-            DetailsLoader()
-        }
+        )
     }
 
     LaunchedEffect(Unit) {
@@ -127,7 +127,11 @@ fun DetailsScreen() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailsContent(photoDetail: PhotosResponseItem?, onAction: (DetailsScreenActions) -> Unit) {
+fun DetailsContent(
+    photoDetail: PhotosResponseItem?,
+    isFavourite: Boolean,
+    onAction: (DetailsScreenActions) -> Unit
+) {
     photoDetail?.let { photo ->
         val blurBitmap =
             BlurHashDecoder.decode(blurHash = photo.blurHash, width = 300, height = 300)
@@ -193,17 +197,17 @@ fun DetailsContent(photoDetail: PhotosResponseItem?, onAction: (DetailsScreenAct
                 ) {
                     ActionItem(
                         title = "Save",
-                        icon = com.segunfrancis.theme.R.drawable.ic_favorite
+                        icon = if (isFavourite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite
                     ) {
                         onAction(DetailsScreenActions.OnFavourite)
                     }
                     ActionItem(
                         title = "Download",
-                        icon = com.segunfrancis.theme.R.drawable.ic_download
+                        icon = R.drawable.ic_download
                     ) {
                         onAction(DetailsScreenActions.OnDownload)
                     }
-                    ActionItem(title = "Share", icon = com.segunfrancis.theme.R.drawable.ic_share) {
+                    ActionItem(title = "Share", icon = R.drawable.ic_share) {
                         onAction(DetailsScreenActions.OnShare)
                     }
                 }
@@ -277,7 +281,14 @@ fun DetailsError(error: String?, onRetryClick: () -> Unit) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = error.orEmpty(), style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = error.orEmpty(),
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+        )
         Spacer(Modifier.height(24.dp))
         Button(onClick = { onRetryClick() }) {
             Text(text = "Retry")
@@ -289,7 +300,7 @@ fun DetailsError(error: String?, onRetryClick: () -> Unit) {
 @Composable
 fun DetailsPreview() {
     WallpaperDownloaderTheme {
-        DetailsContent(photoDetail = photoItem, onAction = {})
+        DetailsContent(photoDetail = photoItem, isFavourite = true, onAction = {})
     }
 }
 

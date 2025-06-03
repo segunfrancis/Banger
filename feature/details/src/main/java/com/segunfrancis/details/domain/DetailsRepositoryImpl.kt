@@ -6,16 +6,26 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import com.segunfrancis.details.domain.data.DetailsApi
+import com.segunfrancis.local.PhotoWithUser
+import com.segunfrancis.local.PhotosResponseEntity
+import com.segunfrancis.local.UrlsEntity
+import com.segunfrancis.local.UserEntity
+import com.segunfrancis.local.UserLinksEntity
+import com.segunfrancis.local.UserProfileImageEntity
+import com.segunfrancis.local.WDDao
 import com.segunfrancis.remote.DownloadResponse
 import com.segunfrancis.remote.PhotosResponseItem
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import java.io.IOException
 
 class DetailsRepositoryImpl(
     private val dispatcher: CoroutineDispatcher,
     private val api: DetailsApi,
-    private val context: Context
+    private val context: Context,
+    private val dao: WDDao
 ) : DetailsRepository {
     override suspend fun getPhotoDetails(id: String): Result<PhotosResponseItem> {
         return try {
@@ -70,6 +80,99 @@ class DetailsRepositoryImpl(
         } catch (t: Throwable) {
             t.printStackTrace()
             Result.failure(t)
+        }
+    }
+
+    override suspend fun addPhotoToFavourite(item: PhotosResponseItem) {
+        withContext(dispatcher) {
+            dao.insertPhotoWithUser(
+                photosResponseEntity = item.toPhotoEntity(),
+                userEntity = item.toUsersEntity(),
+                urlsEntity = item.toUrlsEntity(),
+                userProfileImageEntity = item.toUserProfileImageEntity(),
+                userLinksEntity = item.toUserLinksEntity()
+            )
+        }
+    }
+
+    override suspend fun removePhotoFromFavourite(photoId: String) {
+        withContext(dispatcher) {
+            dao.deletePhotoById(id = photoId)
+        }
+    }
+
+    override fun getPhotoById(photoId: String): Result<Flow<PhotoWithUser?>> {
+        return try {
+            Result.success(dao.getPhotoWithUserById(id = photoId).flowOn(dispatcher))
+        } catch (t: Throwable) {
+            Result.failure(t)
+        }
+    }
+
+    private fun PhotosResponseItem.toPhotoEntity(): PhotosResponseEntity {
+        return with(this) {
+            PhotosResponseEntity(
+                id = id,
+                description = description,
+                altDescription = altDescription,
+                blurHash = blurHash,
+                width = width,
+                height = height,
+                likes = likes
+            )
+        }
+    }
+
+    private fun PhotosResponseItem.toUsersEntity(): UserEntity {
+        val photoId = id
+        return with(this.user) {
+            UserEntity(
+                photoId = photoId,
+                id = id,
+                bio = bio,
+                name = name,
+                lastName = lastName,
+                username = username,
+                firstName = firstName,
+                portfolioUrl = portfolioUrl
+            )
+        }
+    }
+
+    private fun PhotosResponseItem.toUrlsEntity(): UrlsEntity {
+        return with(this.urls) {
+            UrlsEntity(
+                photoId = id,
+                full = full,
+                raw = raw,
+                thumb = thumb,
+                small = small,
+                regular = regular
+            )
+        }
+    }
+
+    private fun PhotosResponseItem.toUserProfileImageEntity(): UserProfileImageEntity {
+        return with(this.user.profileImage) {
+            UserProfileImageEntity(
+                userId = user.id,
+                small = small,
+                large = large,
+                medium = medium
+            )
+        }
+    }
+
+    private fun PhotosResponseItem.toUserLinksEntity(): UserLinksEntity {
+        return with(this.user.links) {
+            UserLinksEntity(
+                userId = user.id,
+                self = self,
+                html = html,
+                likes = likes,
+                photos = photos,
+                portfolio = portfolio
+            )
         }
     }
 }

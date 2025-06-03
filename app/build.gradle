@@ -22,4 +22,5 @@ dependencies {
     implementation(project(":feature:details"))
     implementation(project(":shared:theme"))
     implementation(project(":data:remote"))
+    implementation(project(":data:local"))
 }
