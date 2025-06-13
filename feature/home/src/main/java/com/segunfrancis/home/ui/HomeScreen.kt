@@ -9,9 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,13 +20,13 @@ import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
 import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
 import com.segunfrancis.theme.WallpaperDownloaderTheme
@@ -39,7 +37,7 @@ import org.koin.androidx.compose.koinViewModel
 fun HomeScreen(onPhotoClick: (String) -> Unit) {
     val viewModel = koinViewModel<HomeViewModel>()
     val context = LocalContext.current
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) {
         viewModel.action.collect {
             when (it) {
@@ -72,16 +70,14 @@ fun HomeContent(
         if (isLoading) {
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         }
-        LazyVerticalStaggeredGrid(
+        LazyColumn(
             modifier = Modifier,
-            columns = StaggeredGridCells.Fixed(2),
-            verticalItemSpacing = 8.dp,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(vertical = 8.dp)
         ) {
             homePhotos.forEach { homePhoto ->
                 if (homePhoto.second.isNotEmpty()) {
-                    item(span = StaggeredGridItemSpan.FullLine) {
+                    item(key = homePhoto.first) {
                         Column {
                             Text(
                                 text = homePhoto.first.toTitleCase(),

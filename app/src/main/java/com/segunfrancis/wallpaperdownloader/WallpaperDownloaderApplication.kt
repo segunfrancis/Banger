@@ -2,6 +2,7 @@ package com.segunfrancis.wallpaperdownloader
 
 import android.app.Application
 import com.segunfrancis.details.di.detailsModule
+import com.segunfrancis.favourites.ui.di.favouriteModule
 import com.segunfrancis.home.di.homeModule
 import com.segunfrancis.local.localModule
 import com.segunfrancis.remote.remoteModule
@@ -16,7 +17,7 @@ class WallpaperDownloaderApplication : Application() {
         startKoin {
             androidLogger()
             androidContext(this@WallpaperDownloaderApplication)
-            modules(remoteModule, localModule, homeModule, detailsModule)
+            modules(remoteModule, localModule, homeModule, detailsModule, favouriteModule)
         }
     }
 }

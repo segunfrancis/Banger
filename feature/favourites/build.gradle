@@ -1,7 +1,10 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    id('shared-dependencies')
+    alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.ksp)
+    id("shared-dependencies")
+    id("data-dependencies")
 }
 
 android {
@@ -10,4 +13,7 @@ android {
 
 dependencies {
     implementation(project(":shared:theme"))
+    implementation(project(":shared:theme"))
+    implementation(project(":data:local"))
+    implementation(project(":shared:utility"))
 }

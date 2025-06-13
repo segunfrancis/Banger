@@ -30,7 +30,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.segunfrancis.details.ui.DetailsScreen
-import com.segunfrancis.favourites.ui.FavouriteScreen
+import com.segunfrancis.favourites.ui.ui.FavouriteScreen
 import com.segunfrancis.home.ui.HomeScreen
 import com.segunfrancis.profile.ui.ProfileScreen
 import com.segunfrancis.theme.WallpaperDownloaderTheme

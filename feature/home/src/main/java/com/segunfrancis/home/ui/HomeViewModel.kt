@@ -26,9 +26,7 @@ class HomeViewModel(private val useCase: HomeUseCase) : ViewModel() {
     val action: SharedFlow<HomeActions> = _action.asSharedFlow()
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        _uiState.update {
-            it.copy(isLoading = false)
-        }
+        _uiState.update { it.copy(isLoading = false) }
         _action.tryEmit(HomeActions.ShowError(throwable.localizedMessage))
     }
 
@@ -43,11 +41,11 @@ class HomeViewModel(private val useCase: HomeUseCase) : ViewModel() {
             useCase.invoke().forEach { result ->
                 result.onSuccess { success ->
                     response.add(success.toPhotoItemPair())
-                    _uiState.update { it.copy(homePhotos = response.toList()) }
+                    _uiState.update { it.copy(isLoading = false, homePhotos = response.toList()) }
                 }.onFailure {
 
+                    _uiState.update { it.copy(isLoading = false) }
                 }
-                _uiState.update { it.copy(isLoading = false) }
             }
         }
     }
