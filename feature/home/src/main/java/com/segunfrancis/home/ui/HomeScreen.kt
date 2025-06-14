@@ -29,12 +29,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import coil3.compose.rememberAsyncImagePainter
+import com.segunfrancis.theme.R
 import com.segunfrancis.theme.WallpaperDownloaderTheme
+import com.segunfrancis.theme.components.AppToolbar
 import com.segunfrancis.utility.toTitleCase
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun HomeScreen(onPhotoClick: (String) -> Unit) {
+fun HomeScreen(onPhotoClick: (String) -> Unit, onMenuActionClick: () -> Unit) {
     val viewModel = koinViewModel<HomeViewModel>()
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -50,7 +52,8 @@ fun HomeScreen(onPhotoClick: (String) -> Unit) {
     HomeContent(
         isLoading = uiState.isLoading,
         onPhotoClick = onPhotoClick,
-        homePhotos = uiState.homePhotos
+        homePhotos = uiState.homePhotos,
+        onMenuActionClick = onMenuActionClick
     )
 }
 
@@ -59,14 +62,13 @@ fun HomeScreen(onPhotoClick: (String) -> Unit) {
 fun HomeContent(
     isLoading: Boolean,
     homePhotos: List<Pair<String, List<PhotoItem>>>,
-    onPhotoClick: (String) -> Unit
+    onPhotoClick: (String) -> Unit,
+    onMenuActionClick:() -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
-        Text(
-            text = "Home Screen",
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(24.dp)
-        )
+        AppToolbar(title = "Wallpapers", actionIcon = R.drawable.ic_settings, onActionClick = {
+            onMenuActionClick()
+        })
         if (isLoading) {
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         }
@@ -132,7 +134,8 @@ fun HomeScreenPreview() {
         HomeContent(
             isLoading = true,
             homePhotos = emptyList(),
-            onPhotoClick = {}
+            onPhotoClick = {},
+            onMenuActionClick = {}
         )
     }
 }

@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.Keep
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -22,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -32,17 +34,30 @@ import androidx.navigation.compose.rememberNavController
 import com.segunfrancis.details.ui.DetailsScreen
 import com.segunfrancis.favourites.ui.ui.FavouriteScreen
 import com.segunfrancis.home.ui.HomeScreen
+import com.segunfrancis.local.AppTheme
 import com.segunfrancis.profile.ui.ProfileScreen
+import com.segunfrancis.settings.ui.SettingsScreen
 import com.segunfrancis.theme.WallpaperDownloaderTheme
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.KoinAndroidContext
+import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            WallpaperDownloaderTheme {
+            val mainViewModel = koinViewModel<MainViewModel>()
+            val currentTheme by mainViewModel.theme.collectAsStateWithLifecycle()
+            val isDarkTheme = if (currentTheme == AppTheme.Dark) {
+                true
+            } else if (currentTheme == AppTheme.Light) {
+                false
+            } else {
+                isSystemInDarkTheme()
+            }
+            WallpaperDownloaderTheme(darkTheme = isDarkTheme) {
                 KoinAndroidContext {
                     WallpaperDownloaderApp()
                 }
@@ -95,14 +110,16 @@ fun WallpaperDownloaderApp() {
             composable<AppDestinations.Home> {
                 HomeScreen(onPhotoClick = {
                     navController.navigate(AppDestinations.Details(it))
+                }, onMenuActionClick = {
+                    navController.navigate(AppDestinations.Settings)
                 })
             }
             composable<AppDestinations.Profile> { ProfileScreen() }
             composable<AppDestinations.Favourites> { FavouriteScreen() }
             composable<AppDestinations.Details> { DetailsScreen() }
+            composable<AppDestinations.Settings> { SettingsScreen(onBackClick = { navController.navigateUp() }) }
         }
     }
-
 }
 
 @Serializable
@@ -129,4 +146,7 @@ sealed class AppDestinations {
 
     @Serializable
     data class Details(val id: String) : AppDestinations()
+
+    @Serializable
+    data object Settings : AppDestinations()
 }

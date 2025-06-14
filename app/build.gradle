@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.ksp)
     id("kotlin-parcelize")
     id('shared-dependencies')
+    id("data-dependencies")
 }
 
 android {
@@ -20,6 +21,7 @@ dependencies {
     implementation(project(":feature:profile"))
     implementation(project(":feature:favourites"))
     implementation(project(":feature:details"))
+    implementation(project(":feature:settings"))
     implementation(project(":shared:theme"))
     implementation(project(":data:remote"))
     implementation(project(":data:local"))

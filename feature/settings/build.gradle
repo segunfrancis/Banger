@@ -8,11 +8,10 @@ plugins {
 }
 
 android {
-    namespace 'com.segunfrancis.favourites'
+    namespace 'com.segunfrancis.settings'
 }
 
 dependencies {
     implementation(project(":shared:theme"))
     implementation(project(":data:local"))
-    implementation(project(":shared:utility"))
 }
