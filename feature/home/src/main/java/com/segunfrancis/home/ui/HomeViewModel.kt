@@ -4,7 +4,9 @@ import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.segunfrancis.home.domain.HomePhoto
+import com.segunfrancis.home.domain.HomeRepositoryImpl
 import com.segunfrancis.home.domain.HomeUseCase
+import com.segunfrancis.remote.handleHttpExceptions
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -27,7 +29,7 @@ class HomeViewModel(private val useCase: HomeUseCase) : ViewModel() {
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         _uiState.update { it.copy(isLoading = false) }
-        _action.tryEmit(HomeActions.ShowError(throwable.localizedMessage))
+        _action.tryEmit(HomeActions.ShowError(throwable.handleHttpExceptions()))
     }
 
     init {
@@ -42,8 +44,12 @@ class HomeViewModel(private val useCase: HomeUseCase) : ViewModel() {
                 result.onSuccess { success ->
                     response.add(success.toPhotoItemPair())
                     _uiState.update { it.copy(isLoading = false, homePhotos = response.toList()) }
-                }.onFailure {
-
+                }.onFailure { throwable ->
+                    if (throwable is HomeRepositoryImpl.QueryAwareThrowable) {
+                        // Todo: Update UI accordingly
+                    } else {
+                        _action.tryEmit(HomeActions.ShowError(throwable.handleHttpExceptions()))
+                    }
                     _uiState.update { it.copy(isLoading = false) }
                 }
             }

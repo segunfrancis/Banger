@@ -30,7 +30,7 @@ class HomeRepositoryImpl(private val dispatcher: CoroutineDispatcher, private va
             Result.success(photos)
         } catch (t: Throwable) {
             t.printStackTrace()
-            Result.failure(t)
+            Result.failure(QueryAwareThrowable(t, query))
         }
     }
 
@@ -59,4 +59,7 @@ class HomeRepositoryImpl(private val dispatcher: CoroutineDispatcher, private va
             )
         }
     }
+
+    class QueryAwareThrowable(cause: Throwable, query: String) :
+        Throwable(message = "Failed for query: $query", cause = cause)
 }

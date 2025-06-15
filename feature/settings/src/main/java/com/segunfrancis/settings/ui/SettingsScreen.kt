@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.segunfrancis.local.AppTheme
+import com.segunfrancis.local.DownloadQuality
 import com.segunfrancis.theme.R
 import com.segunfrancis.theme.WallpaperDownloaderTheme
 import com.segunfrancis.theme.components.AppToolbar
@@ -40,16 +41,23 @@ import org.koin.androidx.compose.koinViewModel
 fun SettingsScreen(onBackClick: () -> Unit) {
     val viewModel = koinViewModel<SettingsViewModel>()
     val currentTheme by viewModel.theme.collectAsStateWithLifecycle()
-    SettingsContent(currentTheme = currentTheme, onBackClick = onBackClick, onThemeItemClick = {
-        viewModel.setTheme(it)
-    })
+    val currentDownloadQuality by viewModel.downloadQuality.collectAsStateWithLifecycle()
+    SettingsContent(
+        currentTheme = currentTheme,
+        currentDownloadQuality = currentDownloadQuality,
+        onBackClick = onBackClick,
+        onThemeItemClick = { viewModel.setTheme(it) },
+        onDownloadQualityItemClick = { viewModel.setDownloadQuality(it) }
+    )
 }
 
 @Composable
 fun SettingsContent(
     currentTheme: AppTheme,
+    currentDownloadQuality: DownloadQuality,
     onBackClick: () -> Unit,
-    onThemeItemClick: (AppTheme) -> Unit
+    onThemeItemClick: (AppTheme) -> Unit,
+    onDownloadQualityItemClick: (DownloadQuality) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -58,6 +66,9 @@ fun SettingsContent(
     ) {
         var themeOptionExpanded by remember { mutableStateOf(false) }
         val themeOptions by remember { mutableStateOf(AppTheme.entries) }
+
+        var downloadQualityExpanded by remember { mutableStateOf(false) }
+        val downloadQualityOptions by remember { mutableStateOf(DownloadQuality.entries) }
 
         AppToolbar(
             title = "App Settings",
@@ -71,11 +82,33 @@ fun SettingsContent(
             modifier = Modifier.padding(horizontal = 16.dp)
         )
         Spacer(Modifier.height(24.dp))
-        SettingsItem(
-            title = "Download Quality",
-            subtitle = "Choose the quality of the downloaded wallpapers",
-            value = "High"
-        )
+        Box(modifier = Modifier.wrapContentSize()) {
+            SettingsItem(
+                title = "Download Quality",
+                subtitle = "Choose the quality of the downloaded wallpapers",
+                value = currentDownloadQuality.name,
+                onItemClick = { downloadQualityExpanded = true }
+            )
+            DropdownMenu(
+                expanded = downloadQualityExpanded,
+                onDismissRequest = { downloadQualityExpanded = false },
+                offset = DpOffset(x = 24.dp, y = 0.dp)
+            ) {
+                downloadQualityOptions.forEach {
+                    DropdownMenuItem(text = { Text(it.name) }, onClick = {
+                        onDownloadQualityItemClick(it)
+                        downloadQualityExpanded = false
+                    }, trailingIcon = {
+                        if (currentDownloadQuality == it) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_check),
+                                contentDescription = "Current download quality"
+                            )
+                        }
+                    })
+                }
+            }
+        }
         Spacer(Modifier.height(8.dp))
         Box(modifier = Modifier.wrapContentSize()) {
             SettingsItem(
@@ -113,8 +146,11 @@ fun SettingsScreenPreview() {
     WallpaperDownloaderTheme {
         SettingsContent(
             currentTheme = AppTheme.SystemDefault,
+            currentDownloadQuality = DownloadQuality.Medium,
             onBackClick = {},
-            onThemeItemClick = {})
+            onThemeItemClick = {},
+            onDownloadQualityItemClick = {}
+        )
     }
 }
 

@@ -1,11 +1,11 @@
 package com.segunfrancis.details.ui
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.segunfrancis.details.domain.DetailsRepository
 import com.segunfrancis.remote.PhotosResponseItem
+import com.segunfrancis.remote.handleHttpExceptions
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -31,7 +31,7 @@ class DetailsViewModel(
     private var photoId: String = ""
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        _action.tryEmit(DetailsActions.ShowMessage(throwable.localizedMessage))
+        _action.tryEmit(DetailsActions.ShowMessage(throwable.handleHttpExceptions()))
     }
 
     init {
@@ -51,7 +51,7 @@ class DetailsViewModel(
                     checkFavourite()
                 }
                 .onFailure { error ->
-                    uiState.update { it.copy(detailsError = error.localizedMessage) }
+                    uiState.update { it.copy(detailsError = error.handleHttpExceptions()) }
                 }
             uiState.update { it.copy(isLoading = false) }
         }
@@ -67,7 +67,7 @@ class DetailsViewModel(
                         repository.trackDownload(id)
                     }
                     .onFailure {
-                        _action.tryEmit(DetailsActions.ShowMessage(it.localizedMessage))
+                        _action.tryEmit(DetailsActions.ShowMessage(it.handleHttpExceptions()))
                     }
             }
         }
@@ -91,7 +91,6 @@ class DetailsViewModel(
                 repository.getPhotoById(it.id)
                     .onSuccess { photoWithUserFlow ->
                         photoWithUserFlow.collect { photoWithUser ->
-                            Log.d("checkFavourite", photoWithUser?.userEntity.toString())
                             uiState.update { state ->
                                 state.copy(
                                     isFavourite = photoWithUser?.userEntity?.photoId.equals(
@@ -103,7 +102,7 @@ class DetailsViewModel(
                         }
                     }
                     .onFailure {
-                        _action.tryEmit(DetailsActions.ShowMessage(it.localizedMessage))
+                        _action.tryEmit(DetailsActions.ShowMessage(it.handleHttpExceptions()))
                     }
             }
         }

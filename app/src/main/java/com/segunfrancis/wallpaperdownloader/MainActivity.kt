@@ -116,7 +116,7 @@ fun WallpaperDownloaderApp() {
             }
             composable<AppDestinations.Profile> { ProfileScreen() }
             composable<AppDestinations.Favourites> { FavouriteScreen() }
-            composable<AppDestinations.Details> { DetailsScreen() }
+            composable<AppDestinations.Details> { DetailsScreen(onBackClick = { navController.navigateUp() }) }
             composable<AppDestinations.Settings> { SettingsScreen(onBackClick = { navController.navigateUp() }) }
         }
     }

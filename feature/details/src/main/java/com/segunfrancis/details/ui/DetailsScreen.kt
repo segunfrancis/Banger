@@ -6,8 +6,6 @@ import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.DrawableRes
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -43,9 +41,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -60,12 +58,15 @@ import com.segunfrancis.remote.User
 import com.segunfrancis.remote.UserLinks
 import com.segunfrancis.theme.R
 import com.segunfrancis.theme.WallpaperDownloaderTheme
+import com.segunfrancis.theme.components.AppPrimaryButton
+import com.segunfrancis.theme.components.AppSecondaryButton
+import com.segunfrancis.theme.components.AppToolbar
 import com.segunfrancis.utility.BlurHashDecoder
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun DetailsScreen() {
+fun DetailsScreen(onBackClick: () -> Unit) {
     val viewModel = koinViewModel<DetailsViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -109,6 +110,8 @@ fun DetailsScreen() {
                     }
 
                     DetailsScreenActions.OnShare -> {}
+                    DetailsScreenActions.OnBackClick -> onBackClick()
+                    DetailsScreenActions.SetAsWallpaper -> {}
                 }
             }
         )
@@ -139,7 +142,7 @@ fun DetailsContent(
         val scaffoldState = rememberBottomSheetScaffoldState()
         BottomSheetScaffold(
             scaffoldState = scaffoldState,
-            sheetPeekHeight = 230.dp,
+            sheetPeekHeight = 110.dp,
             sheetDragHandle = {
                 Card(
                     modifier = Modifier
@@ -191,69 +194,52 @@ fun DetailsContent(
                     )
                 }
                 Spacer(Modifier.height(16.dp))
+                val actualPhotoDescription = photo.description ?: photo.altDescription
+                actualPhotoDescription?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                }
+                Spacer(Modifier.height(16.dp))
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    ActionItem(
-                        title = "Save",
-                        icon = if (isFavourite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite
-                    ) {
-                        onAction(DetailsScreenActions.OnFavourite)
-                    }
-                    ActionItem(
-                        title = "Download",
-                        icon = R.drawable.ic_download
-                    ) {
-                        onAction(DetailsScreenActions.OnDownload)
-                    }
-                    ActionItem(title = "Share", icon = R.drawable.ic_share) {
-                        onAction(DetailsScreenActions.OnShare)
-                    }
-                }
-                Spacer(Modifier.height(16.dp))
-                photo.description?.let { description ->
-                    Text(
-                        text = "Description",
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                    AppPrimaryButton(
+                        onClick = { onAction(DetailsScreenActions.SetAsWallpaper) },
+                        title = "Set as wallpaper"
                     )
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = description,
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                    AppSecondaryButton(
+                        onClick = { onAction(DetailsScreenActions.OnFavourite) },
+                        title = if (isFavourite) "Added to favourites" else "Add to favourites"
                     )
                 }
-                photoDetail.altDescription?.let { altDescription ->
-                    if (photo.description == null) {
-                        Text(
-                            text = "Description",
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(horizontal = 16.dp)
-                        )
-                        Spacer(Modifier.height(4.dp))
-                        Text(
-                            text = altDescription,
-                            style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(horizontal = 16.dp)
-                        )
-                    }
-                }
-                Spacer(Modifier.height(16.dp))
             },
             content = {
-                AsyncImage(
-                    model = photo.urls.regular,
-                    contentDescription = photo.description,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clickable {
-                            scope.launch { scaffoldState.bottomSheetState.partialExpand() }
-                        },
-                    placeholder = rememberAsyncImagePainter(blurBitmap)
-                )
+                Column(modifier = Modifier.fillMaxSize()) {
+                    AppToolbar(
+                        title = "",
+                        navIcon = R.drawable.ic_arrow_back,
+                        actionIcon = R.drawable.ic_download,
+                        onNavIconClick = { onAction(DetailsScreenActions.OnBackClick) },
+                        onActionClick = { onAction(DetailsScreenActions.OnDownload) }
+                    )
+                    AsyncImage(
+                        model = photo.urls.regular,
+                        contentDescription = photo.description,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable {
+                                scope.launch { scaffoldState.bottomSheetState.partialExpand() }
+                            },
+                        placeholder = rememberAsyncImagePainter(blurBitmap)
+                    )
+                }
             })
     }
 }
@@ -296,7 +282,7 @@ fun DetailsError(error: String?, onRetryClick: () -> Unit) {
     }
 }
 
-@Preview
+@PreviewLightDark
 @Composable
 fun DetailsPreview() {
     WallpaperDownloaderTheme {
@@ -304,33 +290,12 @@ fun DetailsPreview() {
     }
 }
 
-@Composable
-fun ActionItem(title: String, @DrawableRes icon: Int, onClick: () -> Unit) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Card(onClick = onClick, modifier = Modifier.size(56.dp)) {
-            Image(
-                painter = painterResource(icon),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(12.dp)
-            )
-        }
-        Text(
-            text = title,
-            modifier = Modifier
-                .padding(12.dp)
-        )
-    }
-}
-
 sealed interface DetailsScreenActions {
     data object OnFavourite : DetailsScreenActions
     data object OnDownload : DetailsScreenActions
     data object OnShare : DetailsScreenActions
+    data object OnBackClick : DetailsScreenActions
+    data object SetAsWallpaper : DetailsScreenActions
 }
 
 val photoItem = PhotosResponseItem(
