@@ -31,6 +31,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import com.segunfrancis.author_details.ui.AuthorDetailsScreen
 import com.segunfrancis.details.ui.DetailsScreen
 import com.segunfrancis.favourites.ui.ui.FavouriteScreen
 import com.segunfrancis.home.ui.HomeScreen
@@ -116,8 +118,42 @@ fun WallpaperDownloaderApp() {
             }
             composable<AppDestinations.Profile> { ProfileScreen() }
             composable<AppDestinations.Favourites> { FavouriteScreen() }
-            composable<AppDestinations.Details> { DetailsScreen(onBackClick = { navController.navigateUp() }) }
+            composable<AppDestinations.Details> {
+                DetailsScreen(
+                    onBackClick = { navController.navigateUp() },
+                    viewAuthorDetails = { id, name, username, bio, profileImage, blurHash ->
+                        navController.navigate(
+                            AppDestinations.AuthorDetails(
+                                id = id,
+                                name = name,
+                                username = username,
+                                bio = bio,
+                                profileImage = profileImage,
+                                blurHash = blurHash
+                            )
+                        )
+                    }
+                )
+            }
             composable<AppDestinations.Settings> { SettingsScreen(onBackClick = { navController.navigateUp() }) }
+            composable<AppDestinations.AuthorDetails> {
+                val route = it.toRoute<AppDestinations.AuthorDetails>()
+                AuthorDetailsScreen(
+                    onBackClick = { navController.navigateUp() },
+                    onImageClick = { imageId: String ->
+                        navController.navigate(
+                            AppDestinations.Details(
+                                imageId
+                            )
+                        )
+                    },
+                    name = route.name,
+                    username = route.username,
+                    profileImage = route.profileImage,
+                    blurHash = route.blurHash,
+                    bio = route.bio
+                )
+            }
         }
     }
 }
@@ -149,4 +185,14 @@ sealed class AppDestinations {
 
     @Serializable
     data object Settings : AppDestinations()
+
+    @Serializable
+    data class AuthorDetails(
+        val id: String,
+        val name: String,
+        val username: String,
+        val bio: String,
+        val profileImage: String,
+        val blurHash: String
+    ) : AppDestinations()
 }

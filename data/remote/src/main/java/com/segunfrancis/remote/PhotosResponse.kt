@@ -90,6 +90,15 @@ data class User(
     val username: String
 )
 
+@Serializable
+data class UserPhotosResponse(
+    val id: String,
+    val width: Int,
+    val height: Int,
+    @SerialName("blur_hash") val blurHash: String,
+    val urls: Urls
+)
+
 val samplePhotoItem = PhotosResponseItem(
     altDescription = "A beautiful mountain view",
     assetType = "photo",

@@ -1,6 +1,7 @@
 package com.segunfrancis.wallpaperdownloader
 
 import android.app.Application
+import com.segunfrancis.author_details.di.authorDetailsModule
 import com.segunfrancis.details.di.detailsModule
 import com.segunfrancis.favourites.ui.di.favouriteModule
 import com.segunfrancis.home.di.homeModule
@@ -25,7 +26,8 @@ class WallpaperDownloaderApplication : Application() {
                 homeModule,
                 detailsModule,
                 favouriteModule,
-                settingsModule
+                settingsModule,
+                authorDetailsModule
             )
         }
     }

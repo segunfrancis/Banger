@@ -27,10 +27,12 @@
             <option value="$PROJECT_DIR$/data/local" />
             <option value="$PROJECT_DIR$/data/remote" />
             <option value="$PROJECT_DIR$/feature" />
+            <option value="$PROJECT_DIR$/feature/author_details" />
             <option value="$PROJECT_DIR$/feature/details" />
             <option value="$PROJECT_DIR$/feature/favourites" />
             <option value="$PROJECT_DIR$/feature/home" />
             <option value="$PROJECT_DIR$/feature/profile" />
+            <option value="$PROJECT_DIR$/feature/settings" />
             <option value="$PROJECT_DIR$/shared" />
             <option value="$PROJECT_DIR$/shared/theme" />
             <option value="$PROJECT_DIR$/shared/utility" />

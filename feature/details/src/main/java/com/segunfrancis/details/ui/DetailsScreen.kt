@@ -64,9 +64,13 @@ import com.segunfrancis.theme.components.AppToolbar
 import com.segunfrancis.utility.BlurHashDecoder
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import java.text.NumberFormat
 
 @Composable
-fun DetailsScreen(onBackClick: () -> Unit) {
+fun DetailsScreen(
+    onBackClick: () -> Unit,
+    viewAuthorDetails: (id: String, name: String, username: String, bio: String, profileImage: String, blurHash: String) -> Unit
+) {
     val viewModel = koinViewModel<DetailsViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -112,6 +116,17 @@ fun DetailsScreen(onBackClick: () -> Unit) {
                     DetailsScreenActions.OnShare -> {}
                     DetailsScreenActions.OnBackClick -> onBackClick()
                     DetailsScreenActions.SetAsWallpaper -> {}
+                    DetailsScreenActions.ViewAuthorDetails -> {
+                        val user = photosResponseItem.user
+                        viewAuthorDetails(
+                            user.id,
+                            user.name,
+                            user.username,
+                            user.bio.orEmpty(),
+                            user.profileImage.large,
+                            photosResponseItem.blurHash
+                        )
+                    }
                 }
             }
         )
@@ -161,7 +176,8 @@ fun DetailsContent(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .wrapContentHeight(),
+                        .wrapContentHeight()
+                        .clickable { onAction(DetailsScreenActions.ViewAuthorDetails) },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     AsyncImage(
@@ -187,7 +203,7 @@ fun DetailsContent(
                     }
 
                     Text(
-                        text = "${photo.likes} likes",
+                        text = "${NumberFormat.getInstance().format(photo.likes)} likes",
                         modifier = Modifier
                             .wrapContentWidth()
                             .padding(horizontal = 16.dp)
@@ -296,6 +312,7 @@ sealed interface DetailsScreenActions {
     data object OnShare : DetailsScreenActions
     data object OnBackClick : DetailsScreenActions
     data object SetAsWallpaper : DetailsScreenActions
+    data object ViewAuthorDetails : DetailsScreenActions
 }
 
 val photoItem = PhotosResponseItem(
@@ -308,7 +325,7 @@ val photoItem = PhotosResponseItem(
     height = 1080,
     id = "sample-id-123",
     likedByUser = false,
-    likes = 152,
+    likes = 1502,
     links = Links(
         download = "https://example.com/download.jpg",
         downloadLocation = "https://example.com/download-location",

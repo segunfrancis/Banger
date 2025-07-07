@@ -22,6 +22,7 @@ dependencies {
     implementation(project(":feature:favourites"))
     implementation(project(":feature:details"))
     implementation(project(":feature:settings"))
+    implementation(project(":feature:author_details"))
     implementation(project(":shared:theme"))
     implementation(project(":data:remote"))
     implementation(project(":data:local"))

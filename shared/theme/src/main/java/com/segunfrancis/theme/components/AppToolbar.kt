@@ -46,7 +46,7 @@ fun AppToolbar(
             Text(
                 text = title,
                 modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
+                textAlign = TextAlign.Start,
                 style = MaterialTheme.typography.headlineSmall
             )
         },
