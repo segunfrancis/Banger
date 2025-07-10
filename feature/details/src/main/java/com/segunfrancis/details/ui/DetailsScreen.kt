@@ -110,7 +110,7 @@ fun DetailsScreen(
                     }
 
                     DetailsScreenActions.OnFavourite -> {
-                        viewModel.addPhotoToFavourite()
+                        viewModel.togglePhotoFavourite()
                     }
 
                     DetailsScreenActions.OnShare -> {}
@@ -231,7 +231,7 @@ fun DetailsContent(
                     )
                     AppSecondaryButton(
                         onClick = { onAction(DetailsScreenActions.OnFavourite) },
-                        title = if (isFavourite) "Added to favourites" else "Add to favourites"
+                        title = if (isFavourite) "Remove favourites" else "Add to favourites"
                     )
                 }
             },

@@ -73,15 +73,13 @@ class DetailsViewModel(
         }
     }
 
-    fun addPhotoToFavourite() {
+    fun togglePhotoFavourite() {
         viewModelScope.launch(exceptionHandler) {
-            photosResponseItem?.let { repository.addPhotoToFavourite(it) }
-        }
-    }
-
-    fun remotePhotoFromFavourite() {
-        viewModelScope.launch(exceptionHandler) {
-            photosResponseItem?.let { repository.removePhotoFromFavourite(it.id) }
+            if (uiState.value.isFavourite) {
+                photosResponseItem?.let { repository.removePhotoFromFavourite(it.id) }
+            } else {
+                photosResponseItem?.let { repository.addPhotoToFavourite(it) }
+            }
         }
     }
 
