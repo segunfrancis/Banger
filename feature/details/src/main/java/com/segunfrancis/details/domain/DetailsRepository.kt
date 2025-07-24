@@ -13,4 +13,5 @@ interface DetailsRepository {
     suspend fun addPhotoToFavourite(item: PhotosResponseItem)
     suspend fun removePhotoFromFavourite(photoId: String)
     fun getPhotoById(photoId: String): Result<Flow<PhotoWithUser?>>
+    suspend fun setHomeLockScreenFromUri(imageUri: Uri, option: WallpaperOption) : Result<Unit>
 }

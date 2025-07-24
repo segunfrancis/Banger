@@ -1,10 +1,15 @@
 package com.segunfrancis.details.domain
 
+import android.Manifest
+import android.app.WallpaperManager
 import android.content.ContentValues
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import androidx.annotation.RequiresPermission
 import com.segunfrancis.details.domain.data.DetailsApi
 import com.segunfrancis.local.PhotoWithUser
 import com.segunfrancis.local.PhotosResponseEntity
@@ -80,6 +85,31 @@ class DetailsRepositoryImpl(
         } catch (t: Throwable) {
             t.printStackTrace()
             Result.failure(t)
+        }
+    }
+
+    @RequiresPermission(Manifest.permission.SET_WALLPAPER)
+    override suspend fun setHomeLockScreenFromUri(
+        imageUri: Uri,
+        option: WallpaperOption
+    ): Result<Unit> {
+        return withContext(dispatcher) {
+            try {
+                val wallpaperManager = WallpaperManager.getInstance(context)
+                context.contentResolver.openInputStream(imageUri)?.use { stream ->
+                    BitmapFactory.decodeStream(stream)?.let { bitmap ->
+                        val flags = when (option) {
+                            WallpaperOption.HomeScreen -> WallpaperManager.FLAG_SYSTEM
+                            WallpaperOption.LockScreen -> WallpaperManager.FLAG_LOCK
+                            WallpaperOption.HomeAndLockScreen -> WallpaperManager.FLAG_SYSTEM or WallpaperManager.FLAG_LOCK
+                        }
+                        wallpaperManager.setBitmap(bitmap, null, true, flags)
+                        Result.success(Unit)
+                    } ?: Result.failure(IllegalStateException("Failed to decode bitmap"))
+                } ?: Result.failure(IllegalStateException("Failed to open input stream"))
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
         }
     }
 
@@ -175,4 +205,10 @@ class DetailsRepositoryImpl(
             )
         }
     }
+}
+
+enum class WallpaperOption(val title: String) {
+    HomeScreen("Home Screen"),
+    LockScreen("Lock Screen"),
+    HomeAndLockScreen("Home Screen and Lock Screen")
 }
