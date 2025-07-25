@@ -1,58 +1,38 @@
 package com.segunfrancis.home.ui
 
-import android.widget.Toast
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
-import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
-import coil3.compose.rememberAsyncImagePainter
+import com.segunfrancis.theme.LightBackground
 import com.segunfrancis.theme.R
 import com.segunfrancis.theme.WallpaperDownloaderTheme
 import com.segunfrancis.theme.components.AppToolbar
-import com.segunfrancis.utility.toTitleCase
-import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun HomeScreen(onPhotoClick: (String) -> Unit, onMenuActionClick: () -> Unit) {
-    val viewModel = koinViewModel<HomeViewModel>()
-    val context = LocalContext.current
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    LaunchedEffect(Unit) {
-        viewModel.action.collect {
-            when (it) {
-                is HomeActions.ShowError -> {
-                    Toast.makeText(context, it.errorMessage, Toast.LENGTH_LONG).show()
-                }
-            }
-        }
-    }
+fun HomeScreen(onCategoryClick: (String) -> Unit, onMenuActionClick: () -> Unit) {
     HomeContent(
-        isLoading = uiState.isLoading,
-        onPhotoClick = onPhotoClick,
-        homePhotos = uiState.homePhotos,
+        onCategoryClick = onCategoryClick,
         onMenuActionClick = onMenuActionClick
     )
 }
@@ -60,70 +40,54 @@ fun HomeScreen(onPhotoClick: (String) -> Unit, onMenuActionClick: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeContent(
-    isLoading: Boolean,
-    homePhotos: List<Pair<String, List<PhotoItem>>>,
-    onPhotoClick: (String) -> Unit,
-    onMenuActionClick:() -> Unit
+    onCategoryClick: (String) -> Unit,
+    onMenuActionClick: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         AppToolbar(title = "Wallpapers", actionIcon = R.drawable.ic_settings, onActionClick = {
             onMenuActionClick()
         })
-        if (isLoading) {
-            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-        }
-        LazyColumn(
-            modifier = Modifier,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(vertical = 8.dp)
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(160.dp),
+            contentPadding = PaddingValues(12.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            homePhotos.forEach { homePhoto ->
-                if (homePhoto.second.isNotEmpty()) {
-                    item(key = homePhoto.first) {
-                        Column {
-                            Text(
-                                text = homePhoto.first.toTitleCase(),
-                                style = MaterialTheme.typography.titleMedium,
-                                modifier = Modifier.padding(8.dp)
-                            )
-                            HorizontalMultiBrowseCarousel(
-                                modifier = Modifier
-                                    .width(412.dp)
-                                    .height(226.dp),
-                                state = rememberCarouselState(itemCount = { homePhoto.second.size }),
-                                preferredItemWidth = 200.dp,
-                                itemSpacing = 8.dp,
-                                contentPadding = PaddingValues(8.dp)
-                            ) { index ->
-                                val photo = homePhoto.second[index]
-                                PhotoCard(
-                                    modifier = Modifier
-                                        .height(210.dp)
-                                        .maskClip(RoundedCornerShape(8.dp)),
-                                    photo = photo
-                                ) { onPhotoClick(it) }
-                            }
-                        }
-                    }
-                }
+            items(categories) { category ->
+                CategoryCard(title = category.title, image = category.image, onClick = {
+                    onCategoryClick(category.value)
+                })
             }
         }
     }
 }
 
+@PreviewLightDark
 @Composable
-fun PhotoCard(modifier: Modifier = Modifier, photo: PhotoItem, onPhotoClick: (String) -> Unit) {
+fun CategoryCard(
+    @DrawableRes image: Int = R.drawable.il_cars,
+    title: String = "Cars",
+    onClick: () -> Unit = {}
+) {
     Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(8.dp),
-        onClick = { onPhotoClick(photo.id) }) {
-        AsyncImage(
-            model = photo.thumb,
-            contentDescription = photo.description,
-            placeholder = rememberAsyncImagePainter(photo.blurHashBitmap),
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
+        modifier = Modifier
+            .height(200.dp),
+        onClick = onClick
+    ) {
+        Box(contentAlignment = Alignment.BottomStart) {
+            Image(
+                painter = painterResource(image),
+                contentDescription = title,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+            Text(
+                text = title,
+                modifier = Modifier.padding(24.dp),
+                style = MaterialTheme.typography.headlineSmall,
+                color = LightBackground
+            )
+        }
     }
 }
 
@@ -132,10 +96,25 @@ fun PhotoCard(modifier: Modifier = Modifier, photo: PhotoItem, onPhotoClick: (St
 fun HomeScreenPreview() {
     WallpaperDownloaderTheme {
         HomeContent(
-            isLoading = true,
-            homePhotos = emptyList(),
-            onPhotoClick = {},
+            onCategoryClick = {},
             onMenuActionClick = {}
         )
     }
 }
+
+data class Category(val title: String, @DrawableRes val image: Int, val value: String)
+
+val categories = listOf(
+    Category(title = "Abstract", image = R.drawable.il_abstract, value = "abstract"),
+    Category(title = "Nature", image = R.drawable.il_nature, value = "nature"),
+    Category(title = "Animals", image = R.drawable.il_animals, value = "animals"),
+    Category(title = "Cars", image = R.drawable.il_cars, value = "cars"),
+    Category(title = "Space", image = R.drawable.il_space, value = "space"),
+    Category(title = "City", image = R.drawable.il_city, value = "city"),
+    Category(title = "Food", image = R.drawable.il_food, value = "food"),
+    Category(title = "Music", image = R.drawable.il_music, value = "music"),
+    Category(title = "Sports", image = R.drawable.il_sports, value = "sports"),
+    Category(title = "Technology", image = R.drawable.il_technology, value = "technology"),
+    Category(title = "Fashion", image = R.drawable.il_fashion, value = "fashion"),
+    Category(title = "Travel", image = R.drawable.il_travel, value = "travel"),
+)

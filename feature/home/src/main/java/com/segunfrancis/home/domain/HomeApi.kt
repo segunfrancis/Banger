@@ -1,8 +1,8 @@
 package com.segunfrancis.home.domain
 
+import com.segunfrancis.remote.PHOTOS_MAX_SIZE
 import com.segunfrancis.remote.PHOTOS_NORMAL_SIZE
 import com.segunfrancis.remote.PhotosResponseItem
-import com.segunfrancis.remote.RANDOM_PHOTO_SIZE
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -15,6 +15,6 @@ interface HomeApi {
     suspend fun getRandomPhotos(
         @Query("orientation") orientation: String,
         @Query("query") query: String? = null,
-        @Query("count") count: Int = RANDOM_PHOTO_SIZE
+        @Query("count") count: Int = PHOTOS_MAX_SIZE
     ): List<PhotosResponseItem>
 }

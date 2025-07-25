@@ -35,6 +35,7 @@ import androidx.navigation.toRoute
 import com.segunfrancis.author_details.ui.AuthorDetailsScreen
 import com.segunfrancis.details.ui.DetailsScreen
 import com.segunfrancis.favourites.ui.ui.FavouriteScreen
+import com.segunfrancis.home.ui.CategoryDetailsScreen
 import com.segunfrancis.home.ui.HomeScreen
 import com.segunfrancis.local.AppTheme
 import com.segunfrancis.profile.ui.ProfileScreen
@@ -52,12 +53,18 @@ class MainActivity : ComponentActivity() {
         setContent {
             val mainViewModel = koinViewModel<MainViewModel>()
             val currentTheme by mainViewModel.theme.collectAsStateWithLifecycle()
-            val isDarkTheme = if (currentTheme == AppTheme.Dark) {
-                true
-            } else if (currentTheme == AppTheme.Light) {
-                false
-            } else {
-                isSystemInDarkTheme()
+            val isDarkTheme = when (currentTheme) {
+                AppTheme.Dark -> {
+                    true
+                }
+
+                AppTheme.Light -> {
+                    false
+                }
+
+                else -> {
+                    isSystemInDarkTheme()
+                }
             }
             WallpaperDownloaderTheme(darkTheme = isDarkTheme) {
                 KoinAndroidContext {
@@ -110,14 +117,23 @@ fun WallpaperDownloaderApp() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable<AppDestinations.Home> {
-                HomeScreen(onPhotoClick = {
-                    navController.navigate(AppDestinations.Details(it))
+                HomeScreen(onCategoryClick = {
+                    navController.navigate(AppDestinations.CategoryDetails(it))
                 }, onMenuActionClick = {
                     navController.navigate(AppDestinations.Settings)
                 })
             }
             composable<AppDestinations.Profile> { ProfileScreen() }
             composable<AppDestinations.Favourites> { FavouriteScreen() }
+            composable<AppDestinations.CategoryDetails> {
+                val route = it.toRoute<AppDestinations.CategoryDetails>()
+                CategoryDetailsScreen(
+                    title = route.category,
+                    navigateBack = { navController.navigateUp() },
+                    onPhotoClick = { id ->
+                        navController.navigate(AppDestinations.Details(id))
+                    })
+            }
             composable<AppDestinations.Details> {
                 DetailsScreen(
                     onBackClick = { navController.navigateUp() },
@@ -195,4 +211,7 @@ sealed class AppDestinations {
         val profileImage: String,
         val blurHash: String
     ) : AppDestinations()
+
+    @Serializable
+    data class CategoryDetails(val category: String) : AppDestinations()
 }

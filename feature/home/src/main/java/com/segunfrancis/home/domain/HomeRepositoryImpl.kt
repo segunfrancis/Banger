@@ -30,7 +30,7 @@ class HomeRepositoryImpl(private val dispatcher: CoroutineDispatcher, private va
             Result.success(photos)
         } catch (t: Throwable) {
             t.printStackTrace()
-            Result.failure(QueryAwareThrowable(t, query))
+            Result.failure(t)
         }
     }
 

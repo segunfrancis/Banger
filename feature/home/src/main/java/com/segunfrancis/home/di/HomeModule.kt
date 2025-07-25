@@ -4,7 +4,7 @@ import com.segunfrancis.home.domain.HomeApi
 import com.segunfrancis.home.domain.HomeRepository
 import com.segunfrancis.home.domain.HomeRepositoryImpl
 import com.segunfrancis.home.domain.HomeUseCase
-import com.segunfrancis.home.ui.HomeViewModel
+import com.segunfrancis.home.ui.CategoriesDetailsViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import org.koin.core.module.dsl.singleOf
@@ -27,5 +27,5 @@ val homeModule = module {
 
     singleOf(::HomeUseCase)
 
-    viewModelOf(::HomeViewModel)
+    viewModelOf(::CategoriesDetailsViewModel)
 }
