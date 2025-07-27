@@ -13,7 +13,7 @@ import org.koin.dsl.module
 class MainViewModel(repository: SettingsRepository) : ViewModel() {
     val theme = repository.getTheme()
         .catch { it.printStackTrace() }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), AppTheme.SystemDefault)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), AppTheme.System)
 }
 
 val mainModule = module {

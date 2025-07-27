@@ -1,6 +1,5 @@
 package com.segunfrancis.settings.ui
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,24 +9,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.segunfrancis.local.AppTheme
@@ -36,6 +31,7 @@ import com.segunfrancis.theme.R
 import com.segunfrancis.theme.WallpaperDownloaderTheme
 import com.segunfrancis.theme.components.AppToolbar
 import org.koin.androidx.compose.koinViewModel
+import kotlin.enums.EnumEntries
 
 @Composable
 fun SettingsScreen(onBackClick: () -> Unit) {
@@ -64,10 +60,8 @@ fun SettingsContent(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        var themeOptionExpanded by remember { mutableStateOf(false) }
         val themeOptions by remember { mutableStateOf(AppTheme.entries) }
 
-        var downloadQualityExpanded by remember { mutableStateOf(false) }
         val downloadQualityOptions by remember { mutableStateOf(DownloadQuality.entries) }
 
         AppToolbar(
@@ -87,55 +81,19 @@ fun SettingsContent(
                 title = "Download Quality",
                 subtitle = "Choose the quality of the downloaded wallpapers",
                 value = currentDownloadQuality.name,
-                onItemClick = { downloadQualityExpanded = true }
+                options = downloadQualityOptions,
+                onItemClick = { onDownloadQualityItemClick(it as DownloadQuality) }
             )
-            DropdownMenu(
-                expanded = downloadQualityExpanded,
-                onDismissRequest = { downloadQualityExpanded = false },
-                offset = DpOffset(x = 24.dp, y = 0.dp)
-            ) {
-                downloadQualityOptions.forEach {
-                    DropdownMenuItem(text = { Text(it.name) }, onClick = {
-                        onDownloadQualityItemClick(it)
-                        downloadQualityExpanded = false
-                    }, trailingIcon = {
-                        if (currentDownloadQuality == it) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_check),
-                                contentDescription = "Current download quality"
-                            )
-                        }
-                    })
-                }
-            }
         }
         Spacer(Modifier.height(8.dp))
         Box(modifier = Modifier.wrapContentSize()) {
             SettingsItem(
                 title = "App Theme",
                 subtitle = "Choose the theme of the app",
-                value = currentTheme.value,
-                onItemClick = { themeOptionExpanded = true }
+                value = currentTheme.name,
+                options = themeOptions,
+                onItemClick = { onThemeItemClick(it as AppTheme) }
             )
-            DropdownMenu(
-                expanded = themeOptionExpanded,
-                onDismissRequest = { themeOptionExpanded = false },
-                offset = DpOffset(x = 24.dp, y = 0.dp)
-            ) {
-                themeOptions.forEach {
-                    DropdownMenuItem(text = { Text(it.value) }, onClick = {
-                        onThemeItemClick(it)
-                        themeOptionExpanded = false
-                    }, trailingIcon = {
-                        if (currentTheme == it) {
-                            Icon(
-                                painter = painterResource(R.drawable.ic_check),
-                                contentDescription = "Current theme"
-                            )
-                        }
-                    })
-                }
-            }
         }
     }
 }
@@ -145,7 +103,7 @@ fun SettingsContent(
 fun SettingsScreenPreview() {
     WallpaperDownloaderTheme {
         SettingsContent(
-            currentTheme = AppTheme.SystemDefault,
+            currentTheme = AppTheme.System,
             currentDownloadQuality = DownloadQuality.Medium,
             onBackClick = {},
             onThemeItemClick = {},
@@ -154,18 +112,17 @@ fun SettingsScreenPreview() {
     }
 }
 
-@PreviewLightDark
 @Composable
 fun SettingsItem(
     title: String = "Download Quality",
     subtitle: String = "Choose the quality of the downloaded wallpapers",
     value: String = "High",
-    onItemClick: () -> Unit = {}
+    options: EnumEntries<*>,
+    onItemClick: (Enum<*>) -> Unit = {}
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onItemClick() }
             .padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -175,18 +132,30 @@ fun SettingsItem(
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                 style = MaterialTheme.typography.bodyLarge
             )
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp)
+            ) {
+                options.forEachIndexed { index, option ->
+                    SegmentedButton(
+                        selected = value == option.name,
+                        onClick = { onItemClick(option) },
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = options.size
+                        )
+                    ) {
+                        Text(text = option.name)
+                    }
+                }
+            }
             Text(
                 text = subtitle,
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary
             )
         }
-        Text(
-            text = value, modifier = Modifier
-                .wrapContentWidth()
-                .padding(horizontal = 16.dp),
-            style = MaterialTheme.typography.bodyLarge
-        )
     }
 }

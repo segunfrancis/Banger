@@ -11,7 +11,7 @@ data class PhotosResponseEntity(
     @PrimaryKey val id: String,
     val description: String?,
     val altDescription: String?,
-    val blurHash: String,
+    val blurHash: String?,
     val height: Int,
     val width: Int,
     val likes: Int

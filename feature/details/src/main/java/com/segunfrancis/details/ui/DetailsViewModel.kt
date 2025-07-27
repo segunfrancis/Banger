@@ -32,6 +32,7 @@ class DetailsViewModel(
     private var photoId: String = ""
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        throwable.printStackTrace()
         uiState.update { it.copy(isLoading = false) }
         _action.tryEmit(DetailsActions.ShowMessage(throwable.handleHttpExceptions()))
     }

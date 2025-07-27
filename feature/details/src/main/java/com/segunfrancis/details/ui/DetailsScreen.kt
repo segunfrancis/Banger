@@ -41,6 +41,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -210,8 +211,9 @@ fun DetailsContent(
                             .padding(start = 16.dp)
                             .size(70.dp)
                             .clip(CircleShape)
-                            .border(width = 1.dp, color = Color.LightGray),
-                        placeholder = rememberAsyncImagePainter(blurBitmap)
+                            .border(width = 1.dp, color = Color.LightGray, shape = CircleShape),
+                        placeholder = rememberAsyncImagePainter(blurBitmap),
+                        error = painterResource(R.drawable.il_no_profile_image)
                     )
 
                     Column(

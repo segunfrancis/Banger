@@ -8,4 +8,12 @@ plugins {
 
 android {
     namespace 'com.segunfrancis.local'
+
+    defaultConfig {
+        ksp {
+            arg("room.schemaLocation", "$projectDir/schemas")
+            arg("room.incremental", "true")
+            arg("room.expandProjection", "true")
+        }
+    }
 }

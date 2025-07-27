@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -43,7 +44,7 @@ fun CategoryDetailsScreen(title: String, navigateBack: () -> Unit, onPhotoClick:
             ) {
                 Text(
                     text = uiState.message.orEmpty(),
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(24.dp),
                     textAlign = TextAlign.Center
                 )
@@ -93,7 +94,8 @@ fun CategoryDetailsContent(
                         contentDescription = photo.description,
                         placeholder = rememberAsyncImagePainter(photo.blurHashBitmap),
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.height(300.dp)
+                        modifier = Modifier.height(300.dp),
+                        error = painterResource(R.drawable.il_no_image)
                     )
                 }
             }

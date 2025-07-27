@@ -19,7 +19,7 @@ interface SettingsRepository {
 class SettingsRepositoryImpl(private val datastore: DataStore<Preferences>) : SettingsRepository {
     override fun getTheme(): Flow<AppTheme> {
         return datastore.data.map { preferences ->
-            AppTheme.valueOf(preferences[THEME_PREFS_KEY] ?: AppTheme.SystemDefault.name)
+            AppTheme.valueOf(preferences[THEME_PREFS_KEY] ?: AppTheme.System.name)
         }
     }
 
@@ -47,8 +47,8 @@ private object PreferenceKeys {
     val DOWNLOAD_QUALITY_PREFS_KEY = stringPreferencesKey("download_quality_prefs_keys")
 }
 
-enum class AppTheme(val value: String) {
-    Light("Light"), Dark("Dark"), SystemDefault("System Default")
+enum class AppTheme {
+    Light, Dark, System
 }
 
 enum class DownloadQuality {

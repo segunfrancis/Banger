@@ -18,6 +18,7 @@ class FavouriteViewModel(private val repository: FavouriteRepository) : ViewMode
     val action: SharedFlow<FavouriteAction> = _action.asSharedFlow()
 
     val favouritePhotos = repository.getFavourites().catch { throwable ->
+        throwable.printStackTrace()
         throwable.localizedMessage?.let {
             _action.tryEmit(FavouriteAction.ShowError(it))
         }

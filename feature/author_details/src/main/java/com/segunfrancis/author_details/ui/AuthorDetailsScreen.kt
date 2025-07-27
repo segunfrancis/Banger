@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -113,8 +114,9 @@ fun AuthorDetailsContent(
                         modifier = Modifier
                             .size(170.dp)
                             .clip(CircleShape)
-                            .border(width = 1.dp, color = Color.LightGray),
-                        placeholder = rememberAsyncImagePainter(blurBitmap)
+                            .border(width = 1.dp, color = Color.LightGray, shape = CircleShape),
+                        placeholder = rememberAsyncImagePainter(blurBitmap),
+                        error = painterResource(R.drawable.il_no_profile_image)
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(text = name, style = MaterialTheme.typography.titleLarge)

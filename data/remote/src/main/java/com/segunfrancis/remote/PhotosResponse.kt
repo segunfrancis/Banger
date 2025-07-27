@@ -10,7 +10,7 @@ data class PhotosResponseItem(
     @SerialName("asset_type")
     val assetType: String?,
     @SerialName("blur_hash")
-    val blurHash: String,
+    val blurHash: String?,
     val color: String?,
     @SerialName("created_at")
     val createdAt: String,
@@ -97,59 +97,4 @@ data class UserPhotosResponse(
     val height: Int,
     @SerialName("blur_hash") val blurHash: String,
     val urls: Urls
-)
-
-val samplePhotoItem = PhotosResponseItem(
-    altDescription = "A beautiful mountain view",
-    assetType = "photo",
-    blurHash = "LKO2?U%2Tw=w]~RBVZRi};RPxuwH",
-    color = "#AABBCC",
-    createdAt = "2023-01-01T00:00:00Z",
-    description = "An awe-inspiring sunset behind a mountain range.",
-    height = 1080,
-    id = "sample-id-123",
-    likedByUser = false,
-    likes = 152,
-    links = Links(
-        download = "https://example.com/download.jpg",
-        downloadLocation = "https://example.com/download-location",
-        html = "https://example.com/photo-page",
-        self = "https://example.com/api/photo"
-    ),
-    slug = "beautiful-mountain-view",
-    updatedAt = "2023-01-05T12:00:00Z",
-    urls = Urls(
-        full = "https://example.com/full.jpg",
-        raw = "https://example.com/raw.jpg",
-        regular = "https://example.com/regular.jpg",
-        small = "https://example.com/small.jpg",
-        smallS3 = "https://example.com/small-s3.jpg",
-        thumb = "https://example.com/thumb.jpg"
-    ),
-    user = User(
-        bio = "Nature photographer and world explorer.",
-        firstName = "Grace",
-        forHire = true,
-        id = "user-id-456",
-        lastName = "Onaghise",
-        links = UserLinks(
-            html = "https://example.com/user",
-            likes = "https://example.com/user/likes",
-            photos = "https://example.com/user/photos",
-            portfolio = "https://example.com/user/portfolio",
-            self = "https://example.com/api/user"
-        ),
-        name = "Grace Onaghise",
-        portfolioUrl = "https://portfolio.grace.com",
-        profileImage = ProfileImage(
-            large = "https://example.com/profile_large.jpg",
-            medium = "https://example.com/profile_medium.jpg",
-            small = "https://example.com/profile_small.jpg"
-        ),
-        social = Social(
-            portfolioUrl = "https://portfolio.grace.com"
-        ),
-        username = "graceo"
-    ),
-    width = 1920
 )
