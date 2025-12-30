@@ -1,5 +1,6 @@
 package com.segunfrancis.home.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,9 +16,12 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -35,36 +39,24 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun CategoryDetailsScreen(title: String, navigateBack: () -> Unit, onPhotoClick: (String) -> Unit) {
     val viewModel = koinViewModel<CategoriesDetailsViewModel>()
-    when (val uiState = viewModel.uiState.collectAsStateWithLifecycle().value) {
-        is CategoriesDetailsUiState.Error -> {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = uiState.message.orEmpty(),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(24.dp),
-                    textAlign = TextAlign.Center
-                )
-                Button(onClick = { viewModel.getPhotos() }) {
-                    Text(text = "Retry")
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    CategoryDetailsContent(
+        title = title.toTitleCase(),
+        photos = uiState.homePhotos,
+        isLoading = uiState.isLoading,
+        errorMessage = uiState.errorMessage,
+        navigateBack = navigateBack,
+        onPhotoClick = onPhotoClick,
+        onRetryClick = { viewModel.getPhotos() }
+    )
+    LaunchedEffect(Unit) {
+        viewModel.action.collect {
+            when (it) {
+                is CategoriesDetailsActions.ShowError -> {
+                    Toast.makeText(context, "${it.message}", Toast.LENGTH_SHORT).show()
                 }
             }
-        }
-
-        CategoriesDetailsUiState.Loading -> {
-            DialogLoader()
-        }
-
-        is CategoriesDetailsUiState.Success -> {
-            CategoryDetailsContent(
-                title = title.toTitleCase(),
-                photos = uiState.homePhotos,
-                navigateBack = navigateBack,
-                onPhotoClick = onPhotoClick
-            )
         }
     }
 }
@@ -74,8 +66,11 @@ fun CategoryDetailsScreen(title: String, navigateBack: () -> Unit, onPhotoClick:
 fun CategoryDetailsContent(
     title: String = "Abstract",
     photos: List<HomePhoto> = listOf(homePhoto, homePhoto),
+    isLoading: Boolean = false,
+    errorMessage: String? = null,
     navigateBack: () -> Unit = {},
-    onPhotoClick: (String) -> Unit = {}
+    onPhotoClick: (String) -> Unit = {},
+    onRetryClick: () -> Unit = {}
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         AppToolbar(title = title, navIcon = R.drawable.ic_arrow_back, onNavIconClick = navigateBack)
@@ -85,8 +80,9 @@ fun CategoryDetailsContent(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(16.dp)
         ) {
-            items(photos) { photo ->
+            items(items = photos, key = { it.id }) { photo ->
                 Card(
+                    modifier = Modifier.animateItem(),
                     shape = RoundedCornerShape(8.dp),
                     onClick = { onPhotoClick(photo.id) }) {
                     AsyncImage(
@@ -100,6 +96,26 @@ fun CategoryDetailsContent(
                 }
             }
         }
+        if (isLoading) {
+            DialogLoader()
+        }
+    }
+    errorMessage?.let {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = errorMessage,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(24.dp),
+                textAlign = TextAlign.Center
+            )
+            Button(onClick = { onRetryClick() }) {
+                Text(text = "Retry")
+            }
+        }
     }
 }
 
@@ -110,13 +126,7 @@ val homePhoto = HomePhoto(
     thumb = "",
     blurHashBitmap = null,
     altDescription = "",
-    assetType = "",
-    color = "",
-    createdAt = "",
     height = 1,
     width = 2,
-    likedByUser = true,
-    likes = 123,
-    slug = "",
-    updatedAt = ""
+    likes = 123
 )

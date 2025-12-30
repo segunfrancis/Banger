@@ -8,13 +8,13 @@ import com.segunfrancis.home.domain.HomeRepository
 import com.segunfrancis.remote.PhotoOrientation
 import com.segunfrancis.remote.handleHttpExceptions
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -24,11 +24,22 @@ class CategoriesDetailsViewModel(
 ) : ViewModel() {
 
     private val _uiState: MutableStateFlow<CategoriesDetailsUiState> =
-        MutableStateFlow(CategoriesDetailsUiState.Loading)
+        MutableStateFlow(CategoriesDetailsUiState())
     val uiState: StateFlow<CategoriesDetailsUiState> = _uiState.asStateFlow()
 
+    private val _action: MutableSharedFlow<CategoriesDetailsActions> = MutableSharedFlow()
+    val action: SharedFlow<CategoriesDetailsActions> = _action.asSharedFlow()
+
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        _uiState.update { CategoriesDetailsUiState.Error(throwable.handleHttpExceptions()) }
+        _uiState.update { it.copy(isLoading = false) }
+        if (uiState.value.homePhotos.isEmpty()) {
+            _uiState.update { it.copy(errorMessage = throwable.handleHttpExceptions()) }
+        } else {
+            viewModelScope.launch {
+                _uiState.update { it.copy(errorMessage = null) }
+                _action.emit(CategoriesDetailsActions.ShowError(throwable.handleHttpExceptions()))
+            }
+        }
     }
 
     private val query = savedStateHandle.get<String>("category").orEmpty()
@@ -39,16 +50,30 @@ class CategoriesDetailsViewModel(
 
     fun getPhotos() {
         viewModelScope.launch(exceptionHandler) {
-            _uiState.update { CategoriesDetailsUiState.Loading }
-            repository.getRandomPhotos(orientation = PhotoOrientation.Portrait, query = query)
-                .onSuccess { response -> _uiState.update { CategoriesDetailsUiState.Success(response.second) } }
-                .onFailure { throwable -> _uiState.update { CategoriesDetailsUiState.Error(throwable.handleHttpExceptions()) } }
+            _uiState.update { it.copy(isLoading = true) }
+            repository.getPhotos(query = query, orientation = PhotoOrientation.Portrait)
+                .catch { throwable ->
+                    _uiState.update { it.copy(isLoading = false) }
+                    if (uiState.value.homePhotos.isEmpty()) {
+                        _uiState.update { it.copy(errorMessage = throwable.handleHttpExceptions()) }
+                    } else {
+                        _uiState.update { it.copy(errorMessage = null) }
+                        _action.emit(CategoriesDetailsActions.ShowError(throwable.handleHttpExceptions()))
+                    }
+                }
+                .collect { photos ->
+                    _uiState.update { it.copy(isLoading = photos.isEmpty(), homePhotos = photos, errorMessage = null) }
+                }
         }
     }
 }
 
-sealed class CategoriesDetailsUiState {
-    data class Success(val homePhotos: List<HomePhoto>) : CategoriesDetailsUiState()
-    data object Loading : CategoriesDetailsUiState()
-    data class Error(val message: String?) : CategoriesDetailsUiState()
+data class CategoriesDetailsUiState(
+    val homePhotos: List<HomePhoto> = emptyList(),
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null
+)
+
+sealed class CategoriesDetailsActions {
+    data class ShowError(val message: String?) : CategoriesDetailsActions()
 }

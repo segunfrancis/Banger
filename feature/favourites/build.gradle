@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.ksp)
     id("shared-dependencies")
-    id("data-dependencies")
+    id("local-dependencies")
 }
 
 android {

@@ -3,7 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     id("shared-dependencies")
-    id("data-dependencies")
+    id("remote-dependencies")
+    id("local-dependencies")
 }
 
 android {

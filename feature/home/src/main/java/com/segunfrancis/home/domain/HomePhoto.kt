@@ -9,13 +9,7 @@ data class HomePhoto(
     val thumb: String,
     val blurHashBitmap: Bitmap?,
     val altDescription: String?,
-    val assetType: String?,
-    val color: String?,
-    val createdAt: String,
     val height: Int,
     val width: Int,
-    val likedByUser: Boolean,
-    val likes: Int,
-    val slug: String?,
-    val updatedAt: String
+    val likes: Int
 )

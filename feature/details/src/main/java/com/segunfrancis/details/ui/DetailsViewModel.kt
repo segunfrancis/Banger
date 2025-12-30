@@ -88,26 +88,28 @@ class DetailsViewModel(
         }
     }
 
-    private fun setHomeLockWallpaper(option: WallpaperOption) = viewModelScope.launch(exceptionHandler) {
-        uiState.value.imageUri?.let { uri ->
-            uiState.update { it.copy(isLoading = true) }
-            repository.setHomeLockScreenFromUri(uri, option)
-                .onSuccess {
-                    _action.tryEmit(DetailsActions.ShowMessage("${option.title} updated!"))
-                }
-                .onFailure {
-                    _action.tryEmit(DetailsActions.ShowMessage(it.handleHttpExceptions()))
-                }
-            uiState.update { it.copy(isLoading = false) }
+    private fun setHomeLockWallpaper(option: WallpaperOption) =
+        viewModelScope.launch(exceptionHandler) {
+            uiState.value.imageUri?.let { uri ->
+                uiState.update { it.copy(isLoading = true) }
+                repository.setHomeLockScreenFromUri(uri, option)
+                    .onSuccess {
+                        _action.tryEmit(DetailsActions.ShowMessage("${option.title} updated!"))
+                    }
+                    .onFailure {
+                        _action.tryEmit(DetailsActions.ShowMessage(it.handleHttpExceptions()))
+                    }
+                uiState.update { it.copy(isLoading = false) }
+            }
         }
-    }
 
     fun togglePhotoFavourite() {
         viewModelScope.launch(exceptionHandler) {
-            if (uiState.value.isFavourite) {
-                uiState.value.photosResponseItem?.let { repository.removePhotoFromFavourite(it.id) }
-            } else {
-                uiState.value.photosResponseItem?.let { repository.addPhotoToFavourite(it) }
+            uiState.value.photosResponseItem?.let {
+                repository.updateFavouriteStatus(
+                    photoId = it.id,
+                    isFavourite = !uiState.value.isFavourite
+                )
             }
         }
     }
@@ -120,10 +122,7 @@ class DetailsViewModel(
                         photoWithUserFlow.collect { photoWithUser ->
                             uiState.update { state ->
                                 state.copy(
-                                    isFavourite = photoWithUser?.userEntity?.photoId.equals(
-                                        it.id,
-                                        ignoreCase = true
-                                    )
+                                    isFavourite = photoWithUser?.photosResponseEntity?.isFavourite ?: false
                                 )
                             }
                         }

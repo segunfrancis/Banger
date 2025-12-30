@@ -41,6 +41,16 @@ interface WDDao {
     }
 
     @Transaction
+    suspend fun insertPhoto(vararg photos: PhotoForCaching) {
+        for (photo in photos) {
+            insertPhoto(photo.photosResponseEntity)
+            photo.userEntity?.let { insertUser(it) }
+            photo.urlsEntity?.let { insertUrls(it) }
+            photo.userProfileImageEntity?.let { insertUserProfileImage(it) }
+        }
+    }
+
+    @Transaction
     @Query("SELECT * FROM photo_response")
     fun getAllPhotoWithUrls(): Flow<List<PhotoWithUrls>>
 
@@ -50,4 +60,10 @@ interface WDDao {
 
     @Query("DELETE FROM photo_response WHERE id IS :id")
     fun deletePhotoById(id: String)
+
+    @Query("UPDATE photo_response SET isFavourite = :isFavourite WHERE id = :photoId")
+    suspend fun updateFavouriteStatus(photoId: String, isFavourite: Boolean)
+
+    @Query("SELECT * FROM photo_response WHERE category is :category")
+    fun getPhotos(category: String): Flow<List<PhotoForCaching>>
 }

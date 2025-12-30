@@ -60,7 +60,7 @@ fun FavouriteScreen(onMenuActionClick: () -> Unit) {
 fun FavouriteContent(favouritePhotos: List<FavouritePhotoItem>, onMenuActionClick: () -> Unit) {
     Column(modifier = Modifier.fillMaxSize()) {
         AppToolbar(
-            title = "Favourite Screen",
+            title = "Favourite",
             actionIcon = R.drawable.ic_settings,
             onActionClick = {
                 onMenuActionClick()
@@ -87,7 +87,7 @@ fun FavouriteContent(favouritePhotos: List<FavouritePhotoItem>, onMenuActionClic
                         )
                         Spacer(Modifier.height(24.dp))
                         Text(
-                            text = "No saved wallpapers",
+                            text = "No favourite wallpapers",
                             style = MaterialTheme.typography.headlineSmall,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.fillMaxWidth()

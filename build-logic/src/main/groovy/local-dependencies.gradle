@@ -1,7 +1,4 @@
 dependencies {
-    implementation libs.retrofit
-    implementation libs.logging.interceptor
-    implementation libs.kotlinx.retrofit.converter
     implementation libs.room.ktx
     implementation libs.room.runtime
     ksp libs.room.compiler

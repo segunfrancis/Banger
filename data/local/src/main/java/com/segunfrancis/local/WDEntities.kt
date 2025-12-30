@@ -14,7 +14,9 @@ data class PhotosResponseEntity(
     val blurHash: String?,
     val height: Int,
     val width: Int,
-    val likes: Int
+    val likes: Int,
+    val isFavourite: Boolean = false,
+    val category: String
 )
 
 @Entity(
@@ -120,4 +122,18 @@ data class PhotoWithUrls(
 
     @Relation(parentColumn = "id", entityColumn = "photoId")
     val urlsEntity: UrlsEntity,
+)
+
+data class PhotoForCaching(
+    @Embedded
+    val photosResponseEntity: PhotosResponseEntity,
+
+    @Relation(parentColumn = "id", entityColumn = "photoId")
+    val userEntity: UserEntity?,
+
+    @Relation(parentColumn = "id", entityColumn = "photoId")
+    val urlsEntity: UrlsEntity?,
+
+    @Relation(parentColumn = "id", entityColumn = "userId")
+    val userProfileImageEntity: UserProfileImageEntity?
 )

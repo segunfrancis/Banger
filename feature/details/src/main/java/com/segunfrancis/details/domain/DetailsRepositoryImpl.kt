@@ -4,7 +4,6 @@ import android.Manifest
 import android.app.WallpaperManager
 import android.content.ContentValues
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
@@ -116,7 +115,7 @@ class DetailsRepositoryImpl(
     override suspend fun addPhotoToFavourite(item: PhotosResponseItem) {
         withContext(dispatcher) {
             dao.insertPhotoWithUser(
-                photosResponseEntity = item.toPhotoEntity(),
+                photosResponseEntity = item.toPhotoEntity(""), // TODO: supply correct value
                 userEntity = item.toUsersEntity(),
                 urlsEntity = item.toUrlsEntity(),
                 userProfileImageEntity = item.toUserProfileImageEntity(),
@@ -139,7 +138,20 @@ class DetailsRepositoryImpl(
         }
     }
 
-    private fun PhotosResponseItem.toPhotoEntity(): PhotosResponseEntity {
+    override suspend fun updateFavouriteStatus(
+        photoId: String,
+        isFavourite: Boolean
+    ): Result<Unit> {
+        return try {
+            dao.updateFavouriteStatus(photoId, isFavourite)
+            Result.success(Unit)
+        } catch (t: Throwable) {
+            t.printStackTrace()
+            Result.failure(t)
+        }
+    }
+
+    private fun PhotosResponseItem.toPhotoEntity(category: String): PhotosResponseEntity {
         return with(this) {
             PhotosResponseEntity(
                 id = id,
@@ -148,7 +160,8 @@ class DetailsRepositoryImpl(
                 blurHash = blurHash,
                 width = width,
                 height = height,
-                likes = likes
+                likes = likes,
+                category = category
             )
         }
     }

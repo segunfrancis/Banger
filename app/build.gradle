@@ -5,7 +5,6 @@ plugins {
     alias(libs.plugins.ksp)
     id("kotlin-parcelize")
     id('shared-dependencies')
-    id("data-dependencies")
 }
 
 android {

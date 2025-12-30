@@ -105,7 +105,6 @@ fun HomeScreenPreview() {
 data class Category(val title: String, @DrawableRes val image: Int, val value: String)
 
 val categories = listOf(
-    Category(title = "Abstract", image = R.drawable.il_abstract, value = "abstract"),
     Category(title = "Nature", image = R.drawable.il_nature, value = "nature"),
     Category(title = "Animals", image = R.drawable.il_animals, value = "animals"),
     Category(title = "Cars", image = R.drawable.il_cars, value = "cars"),
@@ -117,4 +116,5 @@ val categories = listOf(
     Category(title = "Technology", image = R.drawable.il_technology, value = "technology"),
     Category(title = "Fashion", image = R.drawable.il_fashion, value = "fashion"),
     Category(title = "Travel", image = R.drawable.il_travel, value = "travel"),
+    Category(title = "Abstract", image = R.drawable.il_abstract, value = "abstract"),
 )

@@ -15,7 +15,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         UserProfileImageEntity::class,
         UserLinksEntity::class
     ],
-    version = 2,
+    version = 4,
     exportSchema = true
 )
 abstract class WDDatabase : RoomDatabase() {
@@ -27,9 +27,21 @@ abstract class WDDatabase : RoomDatabase() {
         val migration_1_2 = object : Migration(1, 2) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("CREATE TABLE photo_response_new (id TEXT PRIMARY KEY NOT NULL, description TEXT, altDescription TEXT, blurHash TEXT, height INTEGER NOT NULL, width INTEGER NOT NULL, likes INTEGER NOT NULL)")
-                database.execSQL(" INSERT INTO photo_response_new (id, description, altDescription, blurHash, height, width, likes) SELECT id, description, altDescription, blurHash, height, width, likes FROM photo_response")
+                database.execSQL("INSERT INTO photo_response_new (id, description, altDescription, blurHash, height, width, likes) SELECT id, description, altDescription, blurHash, height, width, likes FROM photo_response")
                 database.execSQL("DROP TABLE photo_response")
                 database.execSQL("ALTER TABLE photo_response_new RENAME TO photo_response")
+            }
+        }
+
+        val migration_2_3 = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE photo_response ADD COLUMN isFavourite INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        val migration_3_4 = object : Migration(3, 4) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE photo_response ADD COLUMN category TEXT NOT NULL DEFAULT ''")
             }
         }
 
@@ -44,6 +56,8 @@ abstract class WDDatabase : RoomDatabase() {
                     "WALLPAPER_DOWNLOADER_DATABASE"
                 )
                     .addMigrations(migration_1_2)
+                    .addMigrations(migration_2_3)
+                    .addMigrations(migration_3_4)
                     .build().also { INSTANCE = it }
             }
         }

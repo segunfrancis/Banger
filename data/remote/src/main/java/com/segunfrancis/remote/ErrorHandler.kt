@@ -7,6 +7,7 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
 fun Throwable.handleHttpExceptions(): String {
+    printStackTrace()
     return when (this) {
         is HttpException -> {
             val errorMessage = when (code()) {
