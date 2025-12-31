@@ -1,10 +1,12 @@
 package com.segunfrancis.home.domain
 
+import com.segunfrancis.local.LinksEntity
 import com.segunfrancis.local.PhotoForCaching
 import com.segunfrancis.local.PhotosResponseEntity
 import com.segunfrancis.local.UrlsEntity
 import com.segunfrancis.local.UserEntity
 import com.segunfrancis.local.UserProfileImageEntity
+import com.segunfrancis.local.UserWithProfileImage
 import com.segunfrancis.local.WDDao
 import com.segunfrancis.remote.PhotoOrientation
 import com.segunfrancis.remote.PhotosResponseItem
@@ -145,9 +147,16 @@ class HomeRepositoryImpl(
             )
             PhotoForCaching(
                 photosResponseEntity = photosResponseEntity,
-                userEntity = userEntity,
+                userWithProfileImage = UserWithProfileImage(
+                    userEntity = userEntity,
+                    userProfileImageEntity = userProfileImageEntity
+                ),
                 urlsEntity = urlsEntity,
-                userProfileImageEntity = userProfileImageEntity
+                linksEntity = LinksEntity(
+                    photoId = id,
+                    download = links.download,
+                    downloadLocation = links.downloadLocation
+                )
             )
         }
     }

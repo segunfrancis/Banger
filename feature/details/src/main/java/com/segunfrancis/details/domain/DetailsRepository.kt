@@ -7,7 +7,7 @@ import com.segunfrancis.remote.PhotosResponseItem
 import kotlinx.coroutines.flow.Flow
 
 interface DetailsRepository {
-    suspend fun getPhotoDetails(id: String): Result<PhotosResponseItem>
+    suspend fun getPhotoDetails(id: String): Result<Flow<DetailPhoto>>
     suspend fun trackDownload(id: String): Result<DownloadResponse>
     suspend fun downloadImage(url: String): Result<Uri?>
     suspend fun addPhotoToFavourite(item: PhotosResponseItem)

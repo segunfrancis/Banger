@@ -13,9 +13,10 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         UserEntity::class,
         UrlsEntity::class,
         UserProfileImageEntity::class,
-        UserLinksEntity::class
+        UserLinksEntity::class,
+        LinksEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = true
 )
 abstract class WDDatabase : RoomDatabase() {
@@ -45,6 +46,12 @@ abstract class WDDatabase : RoomDatabase() {
             }
         }
 
+        val migration_4_5 = object : Migration(4, 5) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("CREATE TABLE links (photoId TEXT NOT NULL PRIMARY KEY, download TEXT NOT NULL, downloadLocation TEXT, FOREIGN KEY (photoId) REFERENCES photo_response (id) ON DELETE CASCADE)")
+            }
+        }
+
         @Volatile
         private var INSTANCE: WDDatabase? = null
 
@@ -58,6 +65,7 @@ abstract class WDDatabase : RoomDatabase() {
                     .addMigrations(migration_1_2)
                     .addMigrations(migration_2_3)
                     .addMigrations(migration_3_4)
+                    .addMigrations(migration_4_5)
                     .build().also { INSTANCE = it }
             }
         }

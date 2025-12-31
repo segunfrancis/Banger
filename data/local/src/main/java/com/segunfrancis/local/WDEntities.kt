@@ -62,6 +62,23 @@ data class UrlsEntity(
 )
 
 @Entity(
+    tableName = "links",
+    foreignKeys = [
+        ForeignKey(
+            entity = PhotosResponseEntity::class,
+            parentColumns = ["id"],
+            childColumns = ["photoId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ]
+)
+data class LinksEntity(
+    @PrimaryKey val photoId: String,
+    val download: String,
+    val downloadLocation: String?
+)
+
+@Entity(
     tableName = "user_profile_image",
     foreignKeys = [
         ForeignKey(
@@ -104,10 +121,10 @@ data class PhotoWithUser(
     val photosResponseEntity: PhotosResponseEntity,
 
     @Relation(parentColumn = "id", entityColumn = "photoId")
-    val userEntity: UserEntity,
+    val userEntity: UserEntity?,
 
     @Relation(parentColumn = "id", entityColumn = "photoId")
-    val urlsEntity: UrlsEntity,
+    val urlsEntity: UrlsEntity?,
 
     @Relation(parentColumn = "id", entityColumn = "userId")
     val userProfileImageEntity: UserProfileImageEntity?,
@@ -124,16 +141,24 @@ data class PhotoWithUrls(
     val urlsEntity: UrlsEntity,
 )
 
+data class UserWithProfileImage(
+    @Embedded
+    val userEntity: UserEntity,
+
+    @Relation(parentColumn = "id", entityColumn = "userId")
+    val userProfileImageEntity: UserProfileImageEntity?
+)
+
 data class PhotoForCaching(
     @Embedded
     val photosResponseEntity: PhotosResponseEntity,
 
-    @Relation(parentColumn = "id", entityColumn = "photoId")
-    val userEntity: UserEntity?,
+    @Relation(entity = UserEntity::class, parentColumn = "id", entityColumn = "photoId")
+    val userWithProfileImage: UserWithProfileImage?,
 
     @Relation(parentColumn = "id", entityColumn = "photoId")
     val urlsEntity: UrlsEntity?,
 
-    @Relation(parentColumn = "id", entityColumn = "userId")
-    val userProfileImageEntity: UserProfileImageEntity?
+    @Relation(parentColumn = "id", entityColumn = "photoId")
+    val linksEntity: LinksEntity?
 )

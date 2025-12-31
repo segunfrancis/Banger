@@ -25,6 +25,9 @@ interface WDDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUserLinks(userLinksEntity: UserLinksEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertLinks(linksEntity: LinksEntity)
+
     @Transaction
     suspend fun insertPhotoWithUser(
         photosResponseEntity: PhotosResponseEntity,
@@ -44,9 +47,10 @@ interface WDDao {
     suspend fun insertPhoto(vararg photos: PhotoForCaching) {
         for (photo in photos) {
             insertPhoto(photo.photosResponseEntity)
-            photo.userEntity?.let { insertUser(it) }
+            photo.userWithProfileImage?.userEntity?.let { insertUser(it) }
             photo.urlsEntity?.let { insertUrls(it) }
-            photo.userProfileImageEntity?.let { insertUserProfileImage(it) }
+            photo.userWithProfileImage?.userProfileImageEntity?.let { insertUserProfileImage(it) }
+            photo.linksEntity?.let { insertLinks(it) }
         }
     }
 
@@ -66,4 +70,8 @@ interface WDDao {
 
     @Query("SELECT * FROM photo_response WHERE category is :category")
     fun getPhotos(category: String): Flow<List<PhotoForCaching>>
+
+    @Transaction
+    @Query("SELECT * FROM photo_response WHERE id is :id")
+    fun getPhotoById(id: String): Flow<PhotoForCaching>
 }

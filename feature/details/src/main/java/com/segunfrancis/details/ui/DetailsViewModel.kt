@@ -4,12 +4,11 @@ import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.segunfrancis.details.domain.DetailPhoto
 import com.segunfrancis.details.domain.DetailsRepository
 import com.segunfrancis.details.domain.WallpaperOption
-import com.segunfrancis.remote.PhotosResponseItem
 import com.segunfrancis.remote.handleHttpExceptions
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -22,8 +21,7 @@ class DetailsViewModel(
     private val repository: DetailsRepository
 ) : ViewModel() {
 
-    private val _action: MutableSharedFlow<DetailsActions> =
-        MutableSharedFlow(onBufferOverflow = BufferOverflow.DROP_OLDEST, extraBufferCapacity = 1)
+    private val _action: MutableSharedFlow<DetailsActions> = MutableSharedFlow()
     val action: SharedFlow<DetailsActions> = _action.asSharedFlow()
 
     var uiState: MutableStateFlow<DetailsUiState> = MutableStateFlow(DetailsUiState())
@@ -34,7 +32,9 @@ class DetailsViewModel(
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         throwable.printStackTrace()
         uiState.update { it.copy(isLoading = false) }
-        _action.tryEmit(DetailsActions.ShowMessage(throwable.handleHttpExceptions()))
+        viewModelScope.launch {
+            _action.emit(DetailsActions.ShowMessage(throwable.handleHttpExceptions()))
+        }
     }
 
     init {
@@ -48,30 +48,29 @@ class DetailsViewModel(
         viewModelScope.launch(exceptionHandler) {
             uiState.update { it.copy(isLoading = true) }
             repository.getPhotoDetails(id)
-                .onSuccess { result ->
-                    uiState.update { it.copy(photosResponseItem = result) }
-                    checkFavourite()
-                    uiState.update { it.copy(isLoading = false) }
+                .onSuccess { resultFlow ->
+                    resultFlow.collect { photo ->
+                        uiState.update { it.copy(isLoading = false, photosResponse = photo) }
+                    }
                 }
                 .onFailure { error ->
-                    uiState.update { it.copy(detailsError = error.handleHttpExceptions()) }
-                    uiState.update { it.copy(isLoading = false) }
+                    uiState.update { it.copy(detailsError = error.handleHttpExceptions(), isLoading = false) }
                 }
         }
     }
 
     fun downloadImage() = viewModelScope.launch(exceptionHandler) {
-        uiState.value.photosResponseItem?.links?.downloadLocation?.let { downloadLocation ->
+        uiState.value.photosResponse?.downloadLocation?.let { downloadLocation ->
             uiState.update { it.copy(isLoading = true) }
             repository.downloadImage(downloadLocation)
                 .onSuccess {
                     uiState.update { state -> state.copy(imageUri = it) }
-                    _action.tryEmit(DetailsActions.ShowMessage("Download Location: ${it?.path}"))
-                    val id = uiState.value.photosResponseItem?.id.orEmpty()
+                    _action.emit(DetailsActions.ShowMessage("Download Location: ${it?.path}"))
+                    val id = uiState.value.photosResponse?.id.orEmpty()
                     repository.trackDownload(id)
                 }
                 .onFailure {
-                    _action.tryEmit(DetailsActions.ShowMessage(it.handleHttpExceptions()))
+                    _action.emit(DetailsActions.ShowMessage(it.handleHttpExceptions()))
                 }
             uiState.update { it.copy(isLoading = false) }
         }
@@ -94,10 +93,10 @@ class DetailsViewModel(
                 uiState.update { it.copy(isLoading = true) }
                 repository.setHomeLockScreenFromUri(uri, option)
                     .onSuccess {
-                        _action.tryEmit(DetailsActions.ShowMessage("${option.title} updated!"))
+                        _action.emit(DetailsActions.ShowMessage("${option.title} updated!"))
                     }
                     .onFailure {
-                        _action.tryEmit(DetailsActions.ShowMessage(it.handleHttpExceptions()))
+                        _action.emit(DetailsActions.ShowMessage(it.handleHttpExceptions()))
                     }
                 uiState.update { it.copy(isLoading = false) }
             }
@@ -105,31 +104,11 @@ class DetailsViewModel(
 
     fun togglePhotoFavourite() {
         viewModelScope.launch(exceptionHandler) {
-            uiState.value.photosResponseItem?.let {
+            uiState.value.photosResponse?.let {
                 repository.updateFavouriteStatus(
                     photoId = it.id,
-                    isFavourite = !uiState.value.isFavourite
+                    isFavourite = !it.isFavourite
                 )
-            }
-        }
-    }
-
-    private fun checkFavourite() {
-        viewModelScope.launch(exceptionHandler) {
-            uiState.value.photosResponseItem?.let {
-                repository.getPhotoById(it.id)
-                    .onSuccess { photoWithUserFlow ->
-                        photoWithUserFlow.collect { photoWithUser ->
-                            uiState.update { state ->
-                                state.copy(
-                                    isFavourite = photoWithUser?.photosResponseEntity?.isFavourite ?: false
-                                )
-                            }
-                        }
-                    }
-                    .onFailure { throwable ->
-                        _action.tryEmit(DetailsActions.ShowMessage(throwable.handleHttpExceptions()))
-                    }
             }
         }
     }
@@ -141,9 +120,8 @@ sealed class DetailsActions {
 
 data class DetailsUiState(
     val isLoading: Boolean = false,
-    val photosResponseItem: PhotosResponseItem? = null,
+    val photosResponse: DetailPhoto? = null,
     val detailsError: String? = null,
-    val isFavourite: Boolean = false,
     val imageUri: Uri? = null,
     val detailsLoading: Boolean = false,
 )
