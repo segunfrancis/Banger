@@ -125,11 +125,16 @@ fun WallpaperDownloaderApp() {
             }
             composable<AppDestinations.Profile> { ProfileScreen() }
             composable<AppDestinations.Favourites> {
-                FavouriteScreen(onMenuActionClick = {
-                    navController.navigate(
-                        AppDestinations.Settings
-                    )
-                })
+                FavouriteScreen(
+                    onMenuActionClick = {
+                        navController.navigate(
+                            AppDestinations.Settings
+                        )
+                    },
+                    navigateToDetails = { id ->
+                        navController.navigate(AppDestinations.Details(id))
+                    }
+                )
             }
             composable<AppDestinations.CategoryDetails> {
                 val route = it.toRoute<AppDestinations.CategoryDetails>()

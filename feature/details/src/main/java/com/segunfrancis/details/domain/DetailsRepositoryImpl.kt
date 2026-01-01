@@ -12,14 +12,8 @@ import androidx.annotation.RequiresPermission
 import com.segunfrancis.details.domain.data.DetailsApi
 import com.segunfrancis.local.PhotoForCaching
 import com.segunfrancis.local.PhotoWithUser
-import com.segunfrancis.local.PhotosResponseEntity
-import com.segunfrancis.local.UrlsEntity
-import com.segunfrancis.local.UserEntity
-import com.segunfrancis.local.UserLinksEntity
-import com.segunfrancis.local.UserProfileImageEntity
 import com.segunfrancis.local.WDDao
 import com.segunfrancis.remote.DownloadResponse
-import com.segunfrancis.remote.PhotosResponseItem
 import com.segunfrancis.utility.BlurHashDecoder
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -118,24 +112,6 @@ class DetailsRepositoryImpl(
         }
     }
 
-    override suspend fun addPhotoToFavourite(item: PhotosResponseItem) {
-        withContext(dispatcher) {
-            dao.insertPhotoWithUser(
-                photosResponseEntity = item.toPhotoEntity(""), // TODO: supply correct value
-                userEntity = item.toUsersEntity(),
-                urlsEntity = item.toUrlsEntity(),
-                userProfileImageEntity = item.toUserProfileImageEntity(),
-                userLinksEntity = item.toUserLinksEntity()
-            )
-        }
-    }
-
-    override suspend fun removePhotoFromFavourite(photoId: String) {
-        withContext(dispatcher) {
-            dao.deletePhotoById(id = photoId)
-        }
-    }
-
     override fun getPhotoById(photoId: String): Result<Flow<PhotoWithUser?>> {
         return try {
             Result.success(dao.getPhotoWithUserById(id = photoId).flowOn(dispatcher))
@@ -154,74 +130,6 @@ class DetailsRepositoryImpl(
         } catch (t: Throwable) {
             t.printStackTrace()
             Result.failure(t)
-        }
-    }
-
-    private fun PhotosResponseItem.toPhotoEntity(category: String): PhotosResponseEntity {
-        return with(this) {
-            PhotosResponseEntity(
-                id = id,
-                description = description,
-                altDescription = altDescription,
-                blurHash = blurHash,
-                width = width,
-                height = height,
-                likes = likes,
-                category = category
-            )
-        }
-    }
-
-    private fun PhotosResponseItem.toUsersEntity(): UserEntity {
-        val photoId = id
-        return with(this.user) {
-            UserEntity(
-                photoId = photoId,
-                id = id,
-                bio = bio,
-                name = name,
-                lastName = lastName,
-                username = username,
-                firstName = firstName,
-                portfolioUrl = portfolioUrl
-            )
-        }
-    }
-
-    private fun PhotosResponseItem.toUrlsEntity(): UrlsEntity {
-        return with(this.urls) {
-            UrlsEntity(
-                photoId = id,
-                full = full,
-                raw = raw,
-                thumb = thumb,
-                small = small,
-                regular = regular
-            )
-        }
-    }
-
-    private fun PhotosResponseItem.toUserProfileImageEntity(): UserProfileImageEntity {
-        return with(this.user.profileImage) {
-            UserProfileImageEntity(
-                userId = user.id,
-                small = small,
-                large = large,
-                medium = medium
-            )
-        }
-    }
-
-    private fun PhotosResponseItem.toUserLinksEntity(): UserLinksEntity {
-        return with(this.user.links) {
-            UserLinksEntity(
-                userId = user.id,
-                self = self,
-                html = html,
-                likes = likes,
-                photos = photos,
-                portfolio = portfolio
-            )
         }
     }
 

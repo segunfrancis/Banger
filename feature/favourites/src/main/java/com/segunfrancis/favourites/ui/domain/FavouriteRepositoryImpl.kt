@@ -1,6 +1,6 @@
 package com.segunfrancis.favourites.ui.domain
 
-import com.segunfrancis.local.PhotoWithUrls
+import com.segunfrancis.local.PhotoForCaching
 import com.segunfrancis.local.WDDao
 import com.segunfrancis.utility.BlurHashDecoder
 import kotlinx.coroutines.CoroutineDispatcher
@@ -11,12 +11,12 @@ import kotlinx.coroutines.flow.map
 class FavouriteRepositoryImpl(private val dao: WDDao, private val dispatcher: CoroutineDispatcher) :
     FavouriteRepository {
     override fun getFavourites(): Flow<List<FavouritePhotoItem>> {
-        return dao.getAllPhotoWithUrls().flowOn(dispatcher).map { photos ->
+        return dao.getAllFavouritePhotos().flowOn(dispatcher).map { photos ->
             photos.map { photo -> photo.toFavouritePhotoItems() }
         }
     }
 
-    private fun PhotoWithUrls.toFavouritePhotoItems(): FavouritePhotoItem {
+    private fun PhotoForCaching.toFavouritePhotoItems(): FavouritePhotoItem {
         return with(this) {
             FavouritePhotoItem(
                 id = photosResponseEntity.id,
@@ -31,12 +31,12 @@ class FavouriteRepositoryImpl(private val dao: WDDao, private val dispatcher: Co
                 height = photosResponseEntity.height,
                 width = photosResponseEntity.width,
                 urls = FavouritePhotoUrls(
-                    photoId = urlsEntity.photoId,
-                    full = urlsEntity.full,
-                    raw = urlsEntity.raw,
-                    small = urlsEntity.small,
-                    thumb = urlsEntity.thumb,
-                    regular = urlsEntity.regular
+                    photoId = urlsEntity?.photoId.orEmpty(),
+                    full = urlsEntity?.full.orEmpty(),
+                    raw = urlsEntity?.raw.orEmpty(),
+                    small = urlsEntity?.small.orEmpty(),
+                    thumb = urlsEntity?.thumb.orEmpty(),
+                    regular = urlsEntity?.regular.orEmpty()
                 )
             )
         }

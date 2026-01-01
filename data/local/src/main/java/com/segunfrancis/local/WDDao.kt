@@ -55,23 +55,20 @@ interface WDDao {
     }
 
     @Transaction
-    @Query("SELECT * FROM photo_response")
-    fun getAllPhotoWithUrls(): Flow<List<PhotoWithUrls>>
-
-    @Transaction
     @Query("SELECT * FROM photo_response WHERE id IS :id")
     fun getPhotoWithUserById(id: String): Flow<PhotoWithUser?>
-
-    @Query("DELETE FROM photo_response WHERE id IS :id")
-    fun deletePhotoById(id: String)
 
     @Query("UPDATE photo_response SET isFavourite = :isFavourite WHERE id = :photoId")
     suspend fun updateFavouriteStatus(photoId: String, isFavourite: Boolean)
 
-    @Query("SELECT * FROM photo_response WHERE category is :category")
+    @Transaction
+    @Query("SELECT * FROM photo_response WHERE isFavourite = 1")
+    fun getAllFavouritePhotos(): Flow<List<PhotoForCaching>>
+
+    @Query("SELECT * FROM photo_response WHERE category IS :category")
     fun getPhotos(category: String): Flow<List<PhotoForCaching>>
 
     @Transaction
-    @Query("SELECT * FROM photo_response WHERE id is :id")
+    @Query("SELECT * FROM photo_response WHERE id IS :id")
     fun getPhotoById(id: String): Flow<PhotoForCaching>
 }

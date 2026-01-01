@@ -38,7 +38,7 @@ import com.segunfrancis.theme.components.AppToolbar
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun FavouriteScreen(onMenuActionClick: () -> Unit) {
+fun FavouriteScreen(onMenuActionClick: () -> Unit, navigateToDetails: (String) -> Unit) {
     val viewModel = koinViewModel<FavouriteViewModel>()
     val favouritePhotos by viewModel.favouritePhotos.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -53,11 +53,19 @@ fun FavouriteScreen(onMenuActionClick: () -> Unit) {
         }
     }
 
-    FavouriteContent(favouritePhotos = favouritePhotos, onMenuActionClick = onMenuActionClick)
+    FavouriteContent(
+        favouritePhotos = favouritePhotos,
+        onMenuActionClick = onMenuActionClick,
+        onPhotoClick = { navigateToDetails(it) }
+    )
 }
 
 @Composable
-fun FavouriteContent(favouritePhotos: List<FavouritePhotoItem>, onMenuActionClick: () -> Unit) {
+fun FavouriteContent(
+    favouritePhotos: List<FavouritePhotoItem>,
+    onMenuActionClick: () -> Unit,
+    onPhotoClick: (String) -> Unit
+) {
     Column(modifier = Modifier.fillMaxSize()) {
         AppToolbar(
             title = "Favourite",
@@ -72,8 +80,10 @@ fun FavouriteContent(favouritePhotos: List<FavouritePhotoItem>, onMenuActionClic
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(16.dp)
         ) {
-            items(items = favouritePhotos.asReversed()) {
-                PhotoCard(photo = it) { }
+            items(items = favouritePhotos.asReversed()) { photo ->
+                PhotoCard(photo = photo) {
+                    onPhotoClick(photo.id)
+                }
             }
             if (favouritePhotos.isEmpty()) {
                 item(span = StaggeredGridItemSpan.FullLine) {
@@ -103,7 +113,7 @@ fun FavouriteContent(favouritePhotos: List<FavouritePhotoItem>, onMenuActionClic
 @Composable
 fun FavouriteScreenPreview() {
     WallpaperDownloaderTheme {
-        FavouriteContent(favouritePhotos = emptyList(), onMenuActionClick = {})
+        FavouriteContent(favouritePhotos = emptyList(), onMenuActionClick = {}, onPhotoClick = {})
     }
 }
 
@@ -111,12 +121,12 @@ fun FavouriteScreenPreview() {
 fun PhotoCard(
     modifier: Modifier = Modifier,
     photo: FavouritePhotoItem,
-    onPhotoClick: (String) -> Unit
+    onPhotoClick: () -> Unit
 ) {
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(8.dp),
-        onClick = { onPhotoClick(photo.id) }) {
+        onClick = { onPhotoClick() }) {
         AsyncImage(
             model = photo.urls.thumb,
             contentDescription = photo.description,
