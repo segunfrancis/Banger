@@ -38,7 +38,8 @@ data class UserEntity(
     val lastName: String?,
     val name: String,
     val portfolioUrl: String?,
-    val username: String
+    val username: String,
+    val isFavourite: Boolean = false
 )
 
 @Entity(
@@ -114,31 +115,6 @@ data class UserLinksEntity(
     val photos: String,
     val portfolio: String,
     val self: String
-)
-
-data class PhotoWithUser(
-    @Embedded
-    val photosResponseEntity: PhotosResponseEntity,
-
-    @Relation(parentColumn = "id", entityColumn = "photoId")
-    val userEntity: UserEntity?,
-
-    @Relation(parentColumn = "id", entityColumn = "photoId")
-    val urlsEntity: UrlsEntity?,
-
-    @Relation(parentColumn = "id", entityColumn = "userId")
-    val userProfileImageEntity: UserProfileImageEntity?,
-
-    @Relation(parentColumn = "id", entityColumn = "userId")
-    val userLinksEntity: UserLinksEntity?
-)
-
-data class PhotoWithUrls(
-    @Embedded
-    val photosResponseEntity: PhotosResponseEntity,
-
-    @Relation(parentColumn = "id", entityColumn = "photoId")
-    val urlsEntity: UrlsEntity,
 )
 
 data class UserWithProfileImage(

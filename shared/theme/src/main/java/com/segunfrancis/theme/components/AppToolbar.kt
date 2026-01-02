@@ -15,6 +15,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -39,7 +40,8 @@ fun AppToolbar(
     actionIcon: Int? = null,
     onActionClick: () -> Unit = {},
     navIcon: Int? = null,
-    onNavIconClick: () -> Unit = {}
+    onNavIconClick: () -> Unit = {},
+    iconsTint: Color = LocalContentColor.current
 ) {
     TopAppBar(
         title = {
@@ -71,7 +73,8 @@ fun AppToolbar(
                     modifier = Modifier
                         .clip(CircleShape)
                         .clickable { onActionClick() }
-                        .padding(8.dp)
+                        .padding(8.dp),
+                    tint = iconsTint
                 )
             }
         },

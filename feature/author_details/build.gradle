@@ -14,5 +14,6 @@ android {
 dependencies {
     implementation(project(":shared:theme"))
     implementation(project(":data:remote"))
+    implementation(project(":data:local"))
     implementation(project(":shared:utility"))
 }

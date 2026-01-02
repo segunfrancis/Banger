@@ -29,21 +29,6 @@ interface WDDao {
     suspend fun insertLinks(linksEntity: LinksEntity)
 
     @Transaction
-    suspend fun insertPhotoWithUser(
-        photosResponseEntity: PhotosResponseEntity,
-        userEntity: UserEntity,
-        urlsEntity: UrlsEntity,
-        userProfileImageEntity: UserProfileImageEntity,
-        userLinksEntity: UserLinksEntity
-    ) {
-        insertPhoto(photosResponseEntity)
-        insertUser(userEntity)
-        insertUrls(urlsEntity)
-        insertUserProfileImage(userProfileImageEntity)
-        insertUserLinks(userLinksEntity)
-    }
-
-    @Transaction
     suspend fun insertPhoto(vararg photos: PhotoForCaching) {
         for (photo in photos) {
             insertPhoto(photo.photosResponseEntity)
@@ -53,10 +38,6 @@ interface WDDao {
             photo.linksEntity?.let { insertLinks(it) }
         }
     }
-
-    @Transaction
-    @Query("SELECT * FROM photo_response WHERE id IS :id")
-    fun getPhotoWithUserById(id: String): Flow<PhotoWithUser?>
 
     @Query("UPDATE photo_response SET isFavourite = :isFavourite WHERE id = :photoId")
     suspend fun updateFavouriteStatus(photoId: String, isFavourite: Boolean)
@@ -71,4 +52,11 @@ interface WDDao {
     @Transaction
     @Query("SELECT * FROM photo_response WHERE id IS :id")
     fun getPhotoById(id: String): Flow<PhotoForCaching>
+
+    @Transaction
+    @Query("SELECT * FROM user WHERE username IS :username")
+    fun getAuthorDetailsByUsername(username: String): Flow<UserWithProfileImage>
+
+    @Query("UPDATE user SET isFavourite = :isFavourite WHERE username = :username")
+    suspend fun updateAuthorFavouriteStatus(username: String, isFavourite: Boolean)
 }

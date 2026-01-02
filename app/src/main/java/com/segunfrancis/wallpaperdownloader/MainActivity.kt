@@ -148,16 +148,9 @@ fun WallpaperDownloaderApp() {
             composable<AppDestinations.Details> {
                 DetailsScreen(
                     onBackClick = { navController.navigateUp() },
-                    viewAuthorDetails = { id, name, username, bio, profileImage, blurHash ->
+                    viewAuthorDetails = { username ->
                         navController.navigate(
-                            AppDestinations.AuthorDetails(
-                                id = id,
-                                name = name,
-                                username = username,
-                                bio = bio,
-                                profileImage = profileImage,
-                                blurHash = blurHash
-                            )
+                            AppDestinations.AuthorDetails(username = username)
                         )
                     }
                 )
@@ -174,11 +167,7 @@ fun WallpaperDownloaderApp() {
                             )
                         )
                     },
-                    name = route.name,
-                    username = route.username,
-                    profileImage = route.profileImage,
-                    blurHash = route.blurHash,
-                    bio = route.bio
+                    username = route.username
                 )
             }
         }
@@ -214,14 +203,7 @@ sealed class AppDestinations {
     data object Settings : AppDestinations()
 
     @Serializable
-    data class AuthorDetails(
-        val id: String,
-        val name: String,
-        val username: String,
-        val bio: String,
-        val profileImage: String,
-        val blurHash: String
-    ) : AppDestinations()
+    data class AuthorDetails(val username: String) : AppDestinations()
 
     @Serializable
     data class CategoryDetails(val category: String) : AppDestinations()

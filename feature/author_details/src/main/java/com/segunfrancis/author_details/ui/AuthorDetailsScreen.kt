@@ -1,5 +1,6 @@
 package com.segunfrancis.author_details.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,12 +21,14 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -43,21 +46,29 @@ import org.koin.androidx.compose.koinViewModel
 fun AuthorDetailsScreen(
     onBackClick: () -> Unit,
     onImageClick: (imageId: String) -> Unit,
-    name: String,
-    username: String,
-    bio: String,
-    profileImage: String,
-    blurHash: String
+    username: String
 ) {
     val viewModel = koinViewModel<AuthorDetailsViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.action.collect {
+            when (it) {
+                is AuthorDetailsAction.ShowError -> {
+                    Toast.makeText(context, it.errorMessage, Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
 
     AuthorDetailsContent(
-        profileImage = profileImage,
-        blurHash = blurHash,
-        name = name,
+        profileImage = uiState.userItem?.profilePhoto,
+        blurHash = "",
+        name = uiState.userItem?.name.orEmpty(),
         username = username,
-        bio = bio,
+        bio = uiState.userItem?.bio.orEmpty(),
+        isFavourite = uiState.userItem?.isFavourite ?: false,
         photos = uiState.photos,
         onAction = {
             when (it) {
@@ -66,7 +77,7 @@ fun AuthorDetailsScreen(
                 }
 
                 AuthorDetailsScreeAction.OnSave -> {
-
+                    viewModel.toggleLikeStatus()
                 }
 
                 is AuthorDetailsScreeAction.OnImageClick -> {
@@ -79,11 +90,12 @@ fun AuthorDetailsScreen(
 
 @Composable
 fun AuthorDetailsContent(
-    profileImage: String,
+    profileImage: String?,
     blurHash: String,
     name: String,
     username: String,
     bio: String,
+    isFavourite: Boolean,
     photos: List<UserPhotos>,
     onAction: (AuthorDetailsScreeAction) -> Unit
 ) {
@@ -93,9 +105,10 @@ fun AuthorDetailsContent(
         AppToolbar(
             title = "About",
             navIcon = R.drawable.ic_arrow_back,
-            actionIcon = R.drawable.ic_favorite,
+            actionIcon = if (isFavourite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite,
             onNavIconClick = { onAction(AuthorDetailsScreeAction.OnBackClick) },
-            onActionClick = { onAction(AuthorDetailsScreeAction.OnSave) }
+            onActionClick = { onAction(AuthorDetailsScreeAction.OnSave) },
+            iconsTint = Color(0xFF994848)
         )
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
@@ -173,6 +186,7 @@ fun AuthorDetailsPreview() {
             name = "John Doe",
             username = "john.doe",
             bio = "Ethan Carter is a talented photographer known for his breathtaking landscape photography. His work captures the beauty and serenity of nature, inviting viewers to explore the world through his lens.",
+            isFavourite = true,
             photos = listOf(),
             onAction = {}
         )

@@ -64,7 +64,7 @@ import java.text.NumberFormat
 @Composable
 fun DetailsScreen(
     onBackClick: () -> Unit,
-    viewAuthorDetails: (id: String, name: String, username: String, bio: String, profileImage: String, blurHash: String) -> Unit
+    viewAuthorDetails: (username: String) -> Unit
 ) {
     val viewModel = koinViewModel<DetailsViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -135,14 +135,7 @@ fun DetailsScreen(
                 }
                 DetailsScreenActions.ViewAuthorDetails -> {
                     uiState.photosResponse?.let { user ->
-                        viewAuthorDetails(
-                            user.id,
-                            user.name,
-                            user.username,
-                            user.bio,
-                            user.profileImage,
-                            uiState.photosResponse?.blurHash.orEmpty()
-                        )
+                        viewAuthorDetails(user.username)
                     }
                 }
             }

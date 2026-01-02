@@ -11,7 +11,6 @@ import android.provider.MediaStore
 import androidx.annotation.RequiresPermission
 import com.segunfrancis.details.domain.data.DetailsApi
 import com.segunfrancis.local.PhotoForCaching
-import com.segunfrancis.local.PhotoWithUser
 import com.segunfrancis.local.WDDao
 import com.segunfrancis.remote.DownloadResponse
 import com.segunfrancis.utility.BlurHashDecoder
@@ -109,14 +108,6 @@ class DetailsRepositoryImpl(
             } catch (e: Exception) {
                 Result.failure(e)
             }
-        }
-    }
-
-    override fun getPhotoById(photoId: String): Result<Flow<PhotoWithUser?>> {
-        return try {
-            Result.success(dao.getPhotoWithUserById(id = photoId).flowOn(dispatcher))
-        } catch (t: Throwable) {
-            Result.failure(t)
         }
     }
 
