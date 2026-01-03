@@ -6,6 +6,7 @@ import com.segunfrancis.details.di.detailsModule
 import com.segunfrancis.favourites.ui.di.favouriteModule
 import com.segunfrancis.home.di.homeModule
 import com.segunfrancis.local.localModule
+import com.segunfrancis.author.di.authorModule
 import com.segunfrancis.remote.remoteModule
 import com.segunfrancis.settings.di.settingsModule
 import org.koin.android.ext.koin.androidContext
@@ -27,7 +28,8 @@ class WallpaperDownloaderApplication : Application() {
                 detailsModule,
                 favouriteModule,
                 settingsModule,
-                authorDetailsModule
+                authorDetailsModule,
+                authorModule
             )
         }
     }

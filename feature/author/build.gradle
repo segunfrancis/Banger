@@ -5,9 +5,10 @@ plugins {
 }
 
 android {
-    namespace 'com.segunfrancis.profile'
+    namespace 'com.segunfrancis.author'
 }
 
 dependencies {
+    implementation(project(":data:local"))
     implementation(project(":shared:theme"))
 }

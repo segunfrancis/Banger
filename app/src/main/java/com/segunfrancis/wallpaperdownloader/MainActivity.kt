@@ -38,7 +38,7 @@ import com.segunfrancis.favourites.ui.ui.FavouriteScreen
 import com.segunfrancis.home.ui.CategoryDetailsScreen
 import com.segunfrancis.home.ui.HomeScreen
 import com.segunfrancis.local.AppTheme
-import com.segunfrancis.profile.ui.ProfileScreen
+import com.segunfrancis.author.ui.AuthorScreen
 import com.segunfrancis.settings.ui.SettingsScreen
 import com.segunfrancis.theme.WallpaperDownloaderTheme
 import kotlinx.serialization.Serializable
@@ -85,7 +85,7 @@ fun WallpaperDownloaderApp() {
     Scaffold(modifier = Modifier.fillMaxSize(), bottomBar = {
         if (currentDestination?.hierarchy?.any { it.hasRoute(AppDestinations.Home::class) } == true
             || currentDestination?.hierarchy?.any { it.hasRoute(AppDestinations.Favourites::class) } == true
-            || currentDestination?.hierarchy?.any { it.hasRoute(AppDestinations.Profile::class) } == true) {
+            || currentDestination?.hierarchy?.any { it.hasRoute(AppDestinations.Author::class) } == true) {
             NavigationBar(modifier = Modifier.fillMaxWidth()) {
                 NavMenuItems.entries.forEach { menuItem ->
                     NavigationBarItem(
@@ -123,7 +123,13 @@ fun WallpaperDownloaderApp() {
                     navController.navigate(AppDestinations.Settings)
                 })
             }
-            composable<AppDestinations.Profile> { ProfileScreen() }
+            composable<AppDestinations.Author> {
+                AuthorScreen(onMenuActionClick = {
+                    navController.navigate(AppDestinations.Settings)
+                }, onAuthorClick = { username ->
+                    navController.navigate(AppDestinations.AuthorDetails(username))
+                })
+            }
             composable<AppDestinations.Favourites> {
                 FavouriteScreen(
                     onMenuActionClick = {
@@ -183,7 +189,7 @@ enum class NavMenuItems(
 ) {
     HOME("Home", Icons.Default.Home, AppDestinations.Home),
     FAVORITES("Favorites", Icons.Default.Favorite, AppDestinations.Favourites),
-    PROFILE("Profile", Icons.Default.AccountBox, AppDestinations.Profile),
+    PROFILE("Authors", Icons.Default.AccountBox, AppDestinations.Author),
 }
 
 sealed class AppDestinations {
@@ -194,7 +200,7 @@ sealed class AppDestinations {
     data object Favourites : AppDestinations()
 
     @Serializable
-    data object Profile : AppDestinations()
+    data object Author : AppDestinations()
 
     @Serializable
     data class Details(val id: String) : AppDestinations()

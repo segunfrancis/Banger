@@ -47,7 +47,7 @@ interface WDDao {
     fun getAllFavouritePhotos(): Flow<List<PhotoForCaching>>
 
     @Query("SELECT * FROM photo_response WHERE category IS :category")
-    fun getPhotos(category: String): Flow<List<PhotoForCaching>>
+    fun getPhotosByCategory(category: String): Flow<List<PhotoForCaching>>
 
     @Transaction
     @Query("SELECT * FROM photo_response WHERE id IS :id")
@@ -59,4 +59,7 @@ interface WDDao {
 
     @Query("UPDATE user SET isFavourite = :isFavourite WHERE username = :username")
     suspend fun updateAuthorFavouriteStatus(username: String, isFavourite: Boolean)
+
+    @Query("SELECT * FROM user WHERE isFavourite == 1")
+    fun getFavouriteAuthors(): Flow<List<UserWithProfileImage>>
 }

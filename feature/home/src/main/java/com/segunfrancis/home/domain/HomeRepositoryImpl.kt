@@ -63,7 +63,7 @@ class HomeRepositoryImpl(
                 )
                 dao.insertPhoto(*photos.map { it.toPhotoForCaching(query) }.toTypedArray())
             }
-            dao.getPhotos(query).collect { photos ->
+            dao.getPhotosByCategory(query).collect { photos ->
                 send(photos.map { photo -> photo.toHomePhoto() }.asReversed())
             }
         }.flowOn(dispatcher)

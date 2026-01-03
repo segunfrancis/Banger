@@ -24,7 +24,7 @@ rootProject.name = "Wallpaper Downloader"
 include ':app'
 include ':feature:home'
 include ':feature:favourites'
-include ':feature:profile'
+include ':feature:author'
 include ':shared:theme'
 include ':data:local'
 include ':data:remote'

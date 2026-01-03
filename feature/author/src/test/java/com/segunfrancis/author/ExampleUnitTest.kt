@@ -1,4 +1,4 @@
-package com.segunfrancis.profile
+package com.segunfrancis.author
 
 import org.junit.Test
 

@@ -17,7 +17,7 @@ android {
 
 dependencies {
     implementation(project(":feature:home"))
-    implementation(project(":feature:profile"))
+    implementation(project(":feature:author"))
     implementation(project(":feature:favourites"))
     implementation(project(":feature:details"))
     implementation(project(":feature:settings"))
