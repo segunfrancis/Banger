@@ -18,6 +18,7 @@ import com.segunfrancis.remote.PhotosResponseItem
 import com.segunfrancis.utility.BlurHashDecoder
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -31,64 +32,70 @@ class DetailsRepositoryImpl(
 ) : DetailsRepository {
     override suspend fun getPhotoDetails(id: String): Result<Flow<DetailPhoto?>> {
         return try {
-            Result.success(
-                dao.getPhotoById(id).map { cachedPhoto ->
-                    Log.d("getPhotoDetails", "PhotoForCaching: $cachedPhoto")
-                    val localDetail = cachedPhoto.toDetailPhoto()
-                    if (localDetail.isValidForDetails()) {
-                        localDetail
-                    } else {
-                        val remoteDetail = api.getPhotoDetails(id)
-                        val isFavourite = cachedPhoto?.photosResponseEntity?.isFavourite ?: false
-                        val isAuthorFavourite = cachedPhoto?.userWithProfileImage?.userEntity?.isFavourite ?: false
-                        dao.insertPhoto(
-                            photosResponseEntity = com.segunfrancis.local.PhotosResponseEntity(
-                                id = remoteDetail.id,
-                                description = remoteDetail.description,
-                                altDescription = remoteDetail.altDescription,
-                                blurHash = remoteDetail.blurHash,
-                                height = remoteDetail.height,
-                                width = remoteDetail.width,
-                                likes = remoteDetail.likes,
-                                isFavourite = isFavourite,
-                                category = cachedPhoto?.photosResponseEntity?.category.orEmpty()
-                            ),
-                            urlsEntity = com.segunfrancis.local.UrlsEntity(
+            withContext(dispatcher) {
+                val cachedPhoto = dao.getPhotoById(id).firstOrNull()
+                val localDetail = cachedPhoto.toDetailPhoto()
+                if (!localDetail.isValidForDetails()) {
+                    val remoteDetail = api.getPhotoDetails(id)
+                    val isFavourite = cachedPhoto?.photosResponseEntity?.isFavourite ?: false
+                    val existingAuthor =
+                        dao.getAuthorDetailsByUsername(remoteDetail.user.username).firstOrNull()
+                    val isAuthorFavourite = existingAuthor?.userEntity?.isFavourite ?: false
+
+                    dao.insertPhoto(
+                        photosResponseEntity = com.segunfrancis.local.PhotosResponseEntity(
+                            id = remoteDetail.id,
+                            description = remoteDetail.description,
+                            altDescription = remoteDetail.altDescription,
+                            blurHash = remoteDetail.blurHash,
+                            height = remoteDetail.height,
+                            width = remoteDetail.width,
+                            likes = remoteDetail.likes,
+                            isFavourite = isFavourite,
+                            category = cachedPhoto?.photosResponseEntity?.category.orEmpty()
+                        ),
+                        urlsEntity = com.segunfrancis.local.UrlsEntity(
+                            photoId = remoteDetail.id,
+                            full = remoteDetail.urls.full,
+                            raw = remoteDetail.urls.raw,
+                            regular = remoteDetail.urls.regular,
+                            small = remoteDetail.urls.small,
+                            thumb = remoteDetail.urls.thumb
+                        ),
+                        linksEntity = com.segunfrancis.local.LinksEntity(
+                            photoId = remoteDetail.id,
+                            download = remoteDetail.links.download,
+                            downloadLocation = remoteDetail.links.downloadLocation
+                        ),
+                        userWithProfileImage = com.segunfrancis.local.UserWithProfileImage(
+                            userEntity = com.segunfrancis.local.UserEntity(
                                 photoId = remoteDetail.id,
-                                full = remoteDetail.urls.full,
-                                raw = remoteDetail.urls.raw,
-                                regular = remoteDetail.urls.regular,
-                                small = remoteDetail.urls.small,
-                                thumb = remoteDetail.urls.thumb
+                                bio = remoteDetail.user.bio,
+                                firstName = remoteDetail.user.firstName,
+                                id = remoteDetail.user.id,
+                                lastName = remoteDetail.user.lastName,
+                                name = remoteDetail.user.name,
+                                portfolioUrl = remoteDetail.user.portfolioUrl,
+                                username = remoteDetail.user.username,
+                                isFavourite = isAuthorFavourite
                             ),
-                            linksEntity = com.segunfrancis.local.LinksEntity(
-                                photoId = remoteDetail.id,
-                                download = remoteDetail.links.download,
-                                downloadLocation = remoteDetail.links.downloadLocation
-                            ),
-                            userWithProfileImage = com.segunfrancis.local.UserWithProfileImage(
-                                userEntity = com.segunfrancis.local.UserEntity(
-                                    photoId = remoteDetail.id,
-                                    bio = remoteDetail.user.bio,
-                                    firstName = remoteDetail.user.firstName,
-                                    id = remoteDetail.user.id,
-                                    lastName = remoteDetail.user.lastName,
-                                    name = remoteDetail.user.name,
-                                    portfolioUrl = remoteDetail.user.portfolioUrl,
-                                    username = remoteDetail.user.username,
-                                    isFavourite = isAuthorFavourite
-                                ),
-                                userProfileImageEntity = com.segunfrancis.local.UserProfileImageEntity(
-                                    userId = remoteDetail.user.id,
-                                    large = remoteDetail.user.profileImage.large,
-                                    medium = remoteDetail.user.profileImage.medium,
-                                    small = remoteDetail.user.profileImage.small
-                                )
+                            userProfileImageEntity = com.segunfrancis.local.UserProfileImageEntity(
+                                userId = remoteDetail.user.id,
+                                large = remoteDetail.user.profileImage.large,
+                                medium = remoteDetail.user.profileImage.medium,
+                                small = remoteDetail.user.profileImage.small
                             )
                         )
-                        localDetail
+                    )
+                }
+            }
+            Result.success(
+                dao.getPhotoById(id)
+                    .map {
+                        Log.d("getPhotoDetails", "PhotoForCaching: $it")
+                        it.toDetailPhoto()
                     }
-                }.flowOn(dispatcher)
+                    .flowOn(dispatcher)
             )
         } catch (t: Throwable) {
             Result.failure(t)
