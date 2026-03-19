@@ -1,4 +1,10 @@
 root = true
 
 [*.{kt,kts}]
+# Keep package names with underscores allowed for this codebase.
+# `ktlint_standard_package-name` is used by newer ktlint versions.
 ktlint_standard_package-name = disabled
+# `disabled_rules` is recognized by older ktlint versions.
+disabled_rules = package-name
+# `ktlint_disabled_rules` is recognized by some intermediate ktlint versions.
+ktlint_disabled_rules = package-name
