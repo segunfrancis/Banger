@@ -4,4 +4,21 @@ plugins {
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.android.library) apply false
+    alias(libs.plugins.ktlint)
+}
+
+subprojects { project ->
+    project.apply plugin: "org.jlleitschuh.gradle.ktlint"
+
+    project.tasks.matching { it.name == "ktlintCheck" }.configureEach { checkTask ->
+        rootProject.tasks.named("ktlintCheck").configure {
+            dependsOn(checkTask)
+        }
+    }
+
+    project.tasks.matching { it.name == "ktlintFormat" }.configureEach { formatTask ->
+        rootProject.tasks.named("ktlintFormat").configure {
+            dependsOn(formatTask)
+        }
+    }
 }
