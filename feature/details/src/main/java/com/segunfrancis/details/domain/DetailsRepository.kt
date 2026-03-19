@@ -5,7 +5,7 @@ import com.segunfrancis.remote.DownloadResponse
 import kotlinx.coroutines.flow.Flow
 
 interface DetailsRepository {
-    suspend fun getPhotoDetails(id: String): Result<Flow<DetailPhoto>>
+    suspend fun getPhotoDetails(id: String): Result<Flow<DetailPhoto?>>
     suspend fun trackDownload(id: String): Result<DownloadResponse>
     suspend fun downloadImage(url: String): Result<Uri?>
     suspend fun setHomeLockScreenFromUri(imageUri: Uri, option: WallpaperOption) : Result<Unit>

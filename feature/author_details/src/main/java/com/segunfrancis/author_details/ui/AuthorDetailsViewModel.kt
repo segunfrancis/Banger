@@ -31,7 +31,6 @@ class AuthorDetailsViewModel(
     val action: SharedFlow<AuthorDetailsAction> = _action.asSharedFlow()
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        throwable.printStackTrace()
         _uiState.update {
             it.copy(
                 isLoading = false,
@@ -99,6 +98,18 @@ class AuthorDetailsViewModel(
             }
         }
     }
+
+    fun onImageClick(imageId: String) {
+        viewModelScope.launch(exceptionHandler) {
+            repository.saveImageDetails(imageId)
+                .onSuccess {
+                    _action.emit(AuthorDetailsAction.OnImageSaved(imageId))
+                }
+                .onFailure { throwable ->
+                    _action.emit(AuthorDetailsAction.ShowError(throwable.handleHttpExceptions()))
+                }
+        }
+    }
 }
 
 data class AuthorDetailsUiState(
@@ -110,4 +121,5 @@ data class AuthorDetailsUiState(
 
 sealed class AuthorDetailsAction {
     data class ShowError(val errorMessage: String?) : AuthorDetailsAction()
+    data class OnImageSaved(val imageId: String) : AuthorDetailsAction()
 }

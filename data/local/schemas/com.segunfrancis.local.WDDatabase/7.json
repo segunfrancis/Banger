@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 6,
-    "identityHash": "f5ba8315d43d022942db6362e00107e4",
+    "version": 7,
+    "identityHash": "d32a420309bc654b3f7e2d56c35edf51",
     "entities": [
       {
         "tableName": "photo_response",
@@ -74,7 +74,7 @@
       },
       {
         "tableName": "user",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`photoId` TEXT NOT NULL, `bio` TEXT, `firstName` TEXT NOT NULL, `id` TEXT NOT NULL, `lastName` TEXT, `name` TEXT NOT NULL, `portfolioUrl` TEXT, `username` TEXT NOT NULL, `isFavourite` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`photoId`) REFERENCES `photo_response`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`photoId` TEXT NOT NULL, `bio` TEXT, `firstName` TEXT NOT NULL, `id` TEXT NOT NULL, `lastName` TEXT, `name` TEXT NOT NULL, `portfolioUrl` TEXT, `username` TEXT NOT NULL, `isFavourite` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`photoId`) REFERENCES `photo_response`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
         "fields": [
           {
             "fieldPath": "photoId",
@@ -141,7 +141,7 @@
         "foreignKeys": [
           {
             "table": "photo_response",
-            "onDelete": "CASCADE",
+            "onDelete": "NO ACTION",
             "onUpdate": "NO ACTION",
             "columns": [
               "photoId"
@@ -154,7 +154,7 @@
       },
       {
         "tableName": "urls",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`photoId` TEXT NOT NULL, `full` TEXT NOT NULL, `raw` TEXT NOT NULL, `regular` TEXT NOT NULL, `small` TEXT NOT NULL, `thumb` TEXT NOT NULL, PRIMARY KEY(`photoId`), FOREIGN KEY(`photoId`) REFERENCES `photo_response`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`photoId` TEXT NOT NULL, `full` TEXT NOT NULL, `raw` TEXT NOT NULL, `regular` TEXT NOT NULL, `small` TEXT NOT NULL, `thumb` TEXT NOT NULL, PRIMARY KEY(`photoId`), FOREIGN KEY(`photoId`) REFERENCES `photo_response`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
         "fields": [
           {
             "fieldPath": "photoId",
@@ -203,7 +203,7 @@
         "foreignKeys": [
           {
             "table": "photo_response",
-            "onDelete": "CASCADE",
+            "onDelete": "NO ACTION",
             "onUpdate": "NO ACTION",
             "columns": [
               "photoId"
@@ -216,7 +216,7 @@
       },
       {
         "tableName": "user_profile_image",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`userId` TEXT NOT NULL, `large` TEXT NOT NULL, `medium` TEXT NOT NULL, `small` TEXT NOT NULL, PRIMARY KEY(`userId`), FOREIGN KEY(`userId`) REFERENCES `user`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`userId` TEXT NOT NULL, `large` TEXT NOT NULL, `medium` TEXT NOT NULL, `small` TEXT NOT NULL, PRIMARY KEY(`userId`), FOREIGN KEY(`userId`) REFERENCES `user`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
         "fields": [
           {
             "fieldPath": "userId",
@@ -253,7 +253,7 @@
         "foreignKeys": [
           {
             "table": "user",
-            "onDelete": "CASCADE",
+            "onDelete": "NO ACTION",
             "onUpdate": "NO ACTION",
             "columns": [
               "userId"
@@ -266,7 +266,7 @@
       },
       {
         "tableName": "user_links",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`userId` TEXT NOT NULL, `html` TEXT NOT NULL, `likes` TEXT NOT NULL, `photos` TEXT NOT NULL, `portfolio` TEXT NOT NULL, `self` TEXT NOT NULL, PRIMARY KEY(`userId`), FOREIGN KEY(`userId`) REFERENCES `user`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`userId` TEXT NOT NULL, `html` TEXT NOT NULL, `likes` TEXT NOT NULL, `photos` TEXT NOT NULL, `portfolio` TEXT NOT NULL, `self` TEXT NOT NULL, PRIMARY KEY(`userId`), FOREIGN KEY(`userId`) REFERENCES `user`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
         "fields": [
           {
             "fieldPath": "userId",
@@ -315,7 +315,7 @@
         "foreignKeys": [
           {
             "table": "user",
-            "onDelete": "CASCADE",
+            "onDelete": "NO ACTION",
             "onUpdate": "NO ACTION",
             "columns": [
               "userId"
@@ -328,7 +328,7 @@
       },
       {
         "tableName": "links",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`photoId` TEXT NOT NULL, `download` TEXT NOT NULL, `downloadLocation` TEXT, PRIMARY KEY(`photoId`), FOREIGN KEY(`photoId`) REFERENCES `photo_response`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`photoId` TEXT NOT NULL, `download` TEXT NOT NULL, `downloadLocation` TEXT, PRIMARY KEY(`photoId`), FOREIGN KEY(`photoId`) REFERENCES `photo_response`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
         "fields": [
           {
             "fieldPath": "photoId",
@@ -359,7 +359,7 @@
         "foreignKeys": [
           {
             "table": "photo_response",
-            "onDelete": "CASCADE",
+            "onDelete": "NO ACTION",
             "onUpdate": "NO ACTION",
             "columns": [
               "photoId"
@@ -374,7 +374,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f5ba8315d43d022942db6362e00107e4')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd32a420309bc654b3f7e2d56c35edf51')"
     ]
   }
 }

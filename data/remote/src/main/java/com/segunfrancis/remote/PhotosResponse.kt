@@ -75,8 +75,6 @@ data class User(
     val bio: String?,
     @SerialName("first_name")
     val firstName: String,
-    @SerialName("for_hire")
-    val forHire: Boolean,
     val id: String,
     @SerialName("last_name")
     val lastName: String?,
@@ -96,5 +94,11 @@ data class UserPhotosResponse(
     val width: Int,
     val height: Int,
     @SerialName("blur_hash") val blurHash: String,
-    val urls: Urls
+    val urls: Urls,
+    val likes: Int,
+    val description: String?,
+    @SerialName("alt_description")
+    val altDescription: String?,
+    val links: Links,
+    val user: User
 )

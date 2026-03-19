@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import android.util.Log
 import androidx.annotation.RequiresPermission
 import com.segunfrancis.details.domain.data.DetailsApi
 import com.segunfrancis.local.PhotoForCaching
@@ -15,6 +16,7 @@ import com.segunfrancis.local.WDDao
 import com.segunfrancis.remote.DownloadResponse
 import com.segunfrancis.utility.BlurHashDecoder
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -27,13 +29,13 @@ class DetailsRepositoryImpl(
     private val context: Context,
     private val dao: WDDao
 ) : DetailsRepository {
-    override suspend fun getPhotoDetails(id: String): Result<Flow<DetailPhoto>> {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override suspend fun getPhotoDetails(id: String): Result<Flow<DetailPhoto?>> {
         return try {
-            Result.success(
-                dao.getPhotoById(id)
-                    .map { it.toDetailPhoto() }
-                    .flowOn(dispatcher)
-            )
+            Result.success(dao.getPhotoById(id).map {
+                Log.d("getPhotoDetails", "PhotoForCaching: $it")
+                it.toDetailPhoto()
+            }.flowOn(dispatcher))
         } catch (t: Throwable) {
             Result.failure(t)
         }
@@ -124,22 +126,22 @@ class DetailsRepositoryImpl(
         }
     }
 
-    private fun PhotoForCaching.toDetailPhoto(): DetailPhoto {
-        return with(this.photosResponseEntity) {
+    private fun PhotoForCaching?.toDetailPhoto(): DetailPhoto? {
+        return this?.let {
             DetailPhoto(
-                id = id,
-                description = description,
-                blurHash = blurHash,
+                id = photosResponseEntity.id,
+                description = photosResponseEntity.description,
+                blurHash = photosResponseEntity.blurHash,
                 thumb = urlsEntity?.thumb.orEmpty(),
-                altDescription = altDescription,
-                height = height,
-                width = width,
-                likes = likes,
-                isFavourite = isFavourite,
+                altDescription = photosResponseEntity.altDescription,
+                height = photosResponseEntity.height,
+                width = photosResponseEntity.width,
+                likes = photosResponseEntity.likes,
+                isFavourite = photosResponseEntity.isFavourite,
                 blurHashBitmap = BlurHashDecoder.decode(
-                    blurHash = blurHash,
-                    width = width.div(100),
-                    height = height.div(100)
+                    blurHash = photosResponseEntity.blurHash,
+                    width = photosResponseEntity.width.div(100),
+                    height = photosResponseEntity.height.div(100)
                 ),
                 username = userWithProfileImage?.userEntity?.username.orEmpty(),
                 name = userWithProfileImage?.userEntity?.name.orEmpty(),

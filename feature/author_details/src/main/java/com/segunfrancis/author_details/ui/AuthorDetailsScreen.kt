@@ -58,6 +58,10 @@ fun AuthorDetailsScreen(
                 is AuthorDetailsAction.ShowError -> {
                     Toast.makeText(context, it.errorMessage, Toast.LENGTH_LONG).show()
                 }
+
+                is AuthorDetailsAction.OnImageSaved -> {
+                    onImageClick(it.imageId)
+                }
             }
         }
     }
@@ -81,7 +85,7 @@ fun AuthorDetailsScreen(
                 }
 
                 is AuthorDetailsScreeAction.OnImageClick -> {
-                    onImageClick(it.imageId)
+                    viewModel.onImageClick(it.imageId)
                 }
             }
         }
@@ -136,12 +140,14 @@ fun AuthorDetailsContent(
                     Spacer(Modifier.height(4.dp))
                     Text(text = username, style = MaterialTheme.typography.bodyMedium)
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = bio, modifier = Modifier
-                            .fillMaxWidth(),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
+                    if (bio.isNotBlank()) {
+                        Text(
+                            text = bio, modifier = Modifier
+                                .fillMaxWidth(),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Spacer(modifier = Modifier.height(24.dp))
+                    }
                     Text(
                         text = "More by $name",
                         style = MaterialTheme.typography.titleLarge,

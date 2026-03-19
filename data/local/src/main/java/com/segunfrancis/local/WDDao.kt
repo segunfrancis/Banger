@@ -23,9 +23,6 @@ interface WDDao {
     suspend fun insertUserProfileImage(userProfileImageEntity: UserProfileImageEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertUserLinks(userLinksEntity: UserLinksEntity)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertLinks(linksEntity: LinksEntity)
 
     @Transaction
@@ -37,6 +34,20 @@ interface WDDao {
             photo.userWithProfileImage?.userProfileImageEntity?.let { insertUserProfileImage(it) }
             photo.linksEntity?.let { insertLinks(it) }
         }
+    }
+
+    @Transaction
+    suspend fun insertPhoto(
+        photosResponseEntity: PhotosResponseEntity,
+        urlsEntity: UrlsEntity,
+        linksEntity: LinksEntity?,
+        userWithProfileImage: UserWithProfileImage?
+    ) {
+        insertPhoto(photosResponseEntity)
+        insertUrls(urlsEntity)
+        userWithProfileImage?.userEntity?.let { insertUser(it) }
+        linksEntity?.let { insertLinks(it) }
+        userWithProfileImage?.userProfileImageEntity?.let { insertUserProfileImage(it) }
     }
 
     @Query("UPDATE photo_response SET isFavourite = :isFavourite WHERE id = :photoId")
@@ -51,11 +62,11 @@ interface WDDao {
 
     @Transaction
     @Query("SELECT * FROM photo_response WHERE id IS :id")
-    fun getPhotoById(id: String): Flow<PhotoForCaching>
+    fun getPhotoById(id: String): Flow<PhotoForCaching?>
 
     @Transaction
     @Query("SELECT * FROM user WHERE username IS :username")
-    fun getAuthorDetailsByUsername(username: String): Flow<UserWithProfileImage>
+    fun getAuthorDetailsByUsername(username: String): Flow<UserWithProfileImage?>
 
     @Query("UPDATE user SET isFavourite = :isFavourite WHERE username = :username")
     suspend fun updateAuthorFavouriteStatus(username: String, isFavourite: Boolean)
