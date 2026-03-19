@@ -12,10 +12,10 @@ import retrofit2.http.Url
 interface DetailsApi {
 
     @GET("photos/{id}")
-    suspend fun getPhotoDetails(@Path("id") id: String) : PhotosResponseItem
+    suspend fun getPhotoDetails(@Path("id") id: String): PhotosResponseItem
 
     @GET("/photos/{id}/download")
-    suspend fun trackDownload(@Path("id") id: String) : DownloadResponse
+    suspend fun trackDownload(@Path("id") id: String): DownloadResponse
 
     @GET
     suspend fun initDownloadImage(@Url url: String): DownloadResponse

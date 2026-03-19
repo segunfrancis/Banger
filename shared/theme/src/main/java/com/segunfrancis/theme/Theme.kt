@@ -47,7 +47,7 @@ data class CustomButtonColors(
     val primary: Color,
     val onPrimary: Color,
     val secondary: Color,
-    val onSecondary: Color,
+    val onSecondary: Color
 )
 
 val LocalButtonColors = staticCompositionLocalOf {

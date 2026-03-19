@@ -123,5 +123,5 @@ data class DetailsUiState(
     val photosResponse: DetailPhoto? = null,
     val detailsError: String? = null,
     val imageUri: Uri? = null,
-    val detailsLoading: Boolean = false,
+    val detailsLoading: Boolean = false
 )

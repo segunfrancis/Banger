@@ -32,7 +32,7 @@ fun AppPrimaryButton(
         Text(
             text = title,
             style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Bold
         )
     }
 }

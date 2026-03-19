@@ -116,5 +116,5 @@ val categories = listOf(
     Category(title = "Technology", image = R.drawable.il_technology, value = "technology"),
     Category(title = "Fashion", image = R.drawable.il_fashion, value = "fashion"),
     Category(title = "Travel", image = R.drawable.il_travel, value = "travel"),
-    Category(title = "Abstract", image = R.drawable.il_abstract, value = "abstract"),
+    Category(title = "Abstract", image = R.drawable.il_abstract, value = "abstract")
 )

@@ -267,7 +267,8 @@ fun DetailsContent(
                         placeholder = rememberAsyncImagePainter(blurBitmap)
                     )
                 }
-            })
+            }
+        )
     }
 }
 

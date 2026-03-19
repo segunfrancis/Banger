@@ -8,6 +8,6 @@ interface DetailsRepository {
     suspend fun getPhotoDetails(id: String): Result<Flow<DetailPhoto?>>
     suspend fun trackDownload(id: String): Result<DownloadResponse>
     suspend fun downloadImage(url: String): Result<Uri?>
-    suspend fun setHomeLockScreenFromUri(imageUri: Uri, option: WallpaperOption) : Result<Unit>
+    suspend fun setHomeLockScreenFromUri(imageUri: Uri, option: WallpaperOption): Result<Unit>
     suspend fun updateFavouriteStatus(photoId: String, isFavourite: Boolean): Result<Unit>
 }

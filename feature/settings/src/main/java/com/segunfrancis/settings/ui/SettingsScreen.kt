@@ -53,7 +53,7 @@ fun SettingsContent(
     currentDownloadQuality: DownloadQuality,
     onBackClick: () -> Unit,
     onThemeItemClick: (AppTheme) -> Unit,
-    onDownloadQualityItemClick: (DownloadQuality) -> Unit,
+    onDownloadQualityItemClick: (DownloadQuality) -> Unit
 ) {
     Column(
         modifier = Modifier

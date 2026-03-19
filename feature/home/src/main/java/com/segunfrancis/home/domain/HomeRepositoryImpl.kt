@@ -53,7 +53,7 @@ class HomeRepositoryImpl(
 
     override suspend fun getPhotos(
         query: String,
-        orientation: PhotoOrientation,
+        orientation: PhotoOrientation
     ): Flow<List<HomePhoto>> {
         return channelFlow {
             launch(dispatcher) {

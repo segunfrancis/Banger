@@ -84,7 +84,8 @@ fun CategoryDetailsContent(
                 Card(
                     modifier = Modifier.animateItem(),
                     shape = RoundedCornerShape(8.dp),
-                    onClick = { onPhotoClick(photo.id) }) {
+                    onClick = { onPhotoClick(photo.id) }
+                ) {
                     AsyncImage(
                         model = photo.thumb,
                         contentDescription = photo.description,

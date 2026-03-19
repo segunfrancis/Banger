@@ -126,7 +126,8 @@ fun PhotoCard(
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(8.dp),
-        onClick = { onPhotoClick() }) {
+        onClick = { onPhotoClick() }
+    ) {
         AsyncImage(
             model = photo.urls.thumb,
             contentDescription = photo.description,

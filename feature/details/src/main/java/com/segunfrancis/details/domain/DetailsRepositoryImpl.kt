@@ -32,10 +32,12 @@ class DetailsRepositoryImpl(
     @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun getPhotoDetails(id: String): Result<Flow<DetailPhoto?>> {
         return try {
-            Result.success(dao.getPhotoById(id).map {
-                Log.d("getPhotoDetails", "PhotoForCaching: $it")
-                it.toDetailPhoto()
-            }.flowOn(dispatcher))
+            Result.success(
+                dao.getPhotoById(id).map {
+                    Log.d("getPhotoDetails", "PhotoForCaching: $it")
+                    it.toDetailPhoto()
+                }.flowOn(dispatcher)
+            )
         } catch (t: Throwable) {
             Result.failure(t)
         }
@@ -58,9 +60,11 @@ class DetailsRepositoryImpl(
                 val imageMimeType = response.body()?.contentType()?.toString() ?: "image/*"
                 val extension = response.body()?.contentType()?.subtype ?: "jpg"
                 val fileName = "unsplash_${System.currentTimeMillis()}.$extension"
-                val collection = if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P)
+                val collection = if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
                     MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                else MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+                } else {
+                    MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+                }
                 val contentResolver = context.contentResolver
                 val contentValues = ContentValues().apply {
                     put(MediaStore.Images.Media.DISPLAY_NAME, fileName)

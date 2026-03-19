@@ -34,24 +34,24 @@ val WallpaperTypography = Typography(
         fontFamily = FontFamily(Font(R.font.plus_jakarta_sans)),
         fontWeight = FontWeight.Bold,
         fontSize = 20.sp,
-        lineHeight = 28.sp,
+        lineHeight = 28.sp
     ),
     titleMedium = TextStyle(
         fontFamily = FontFamily(Font(R.font.plus_jakarta_sans)),
         fontWeight = FontWeight.Medium,
         fontSize = 16.sp,
-        lineHeight = 24.sp,
+        lineHeight = 24.sp
     ),
     bodyMedium = TextStyle(
         fontFamily = FontFamily(Font(R.font.plus_jakarta_sans)),
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
-        lineHeight = 20.sp,
+        lineHeight = 20.sp
     ),
     labelLarge = TextStyle(
         fontFamily = FontFamily(Font(R.font.plus_jakarta_sans)),
         fontWeight = FontWeight.Medium,
         fontSize = 14.sp,
-        lineHeight = 20.sp,
+        lineHeight = 20.sp
     )
 )
