@@ -86,14 +86,21 @@ class AuthorDetailsRepositoryImpl(
         if (photo == null) {
             return Result.failure(Throwable("No photo with such ID exists"))
         }
-        Log.d("saveImageDetails", "UserWithProfileImage: ${photo.user.toUserWithProfileImage(photo.id)}")
+        val existingUser = dao.getAuthorDetailsByUsername(photo.user.username).firstOrNull()
+        val isFavourite = existingUser?.userEntity?.isFavourite ?: false
+        val userWithProfileImage = photo.user.toUserWithProfileImage(
+            photoId = photo.id,
+            isFavourite = isFavourite
+        )
+        Log.d("saveImageDetails", "UserWithProfileImage: $userWithProfileImage")
+
         return try {
             Result.success(
                 dao.insertPhoto(
                     photosResponseEntity = photo.toPhotoEntity(),
                     urlsEntity = photo.urls.toUrlsEntity(photo.id),
                     linksEntity = photo.links.toLinksEntity(photo.id),
-                    userWithProfileImage = photo.user.toUserWithProfileImage(photo.id)
+                    userWithProfileImage = userWithProfileImage
                 )
             )
         } catch (t: Throwable) {
@@ -170,7 +177,10 @@ private fun Links.toLinksEntity(id: String): LinksEntity {
     )
 }
 
-private fun User.toUserWithProfileImage(photoId: String): UserWithProfileImage {
+private fun User.toUserWithProfileImage(
+    photoId: String,
+    isFavourite: Boolean = false
+): UserWithProfileImage {
     return UserWithProfileImage(
         userEntity = UserEntity(
             photoId = photoId,
@@ -180,7 +190,8 @@ private fun User.toUserWithProfileImage(photoId: String): UserWithProfileImage {
             lastName = lastName,
             username = username,
             id = id,
-            portfolioUrl = portfolioUrl
+            portfolioUrl = portfolioUrl,
+            isFavourite = isFavourite
         ),
         userProfileImageEntity = UserProfileImageEntity(
             userId = id,
