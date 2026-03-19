@@ -32,13 +32,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.segunfrancis.author.ui.AuthorScreen
 import com.segunfrancis.author_details.ui.AuthorDetailsScreen
 import com.segunfrancis.details.ui.DetailsScreen
 import com.segunfrancis.favourites.ui.ui.FavouriteScreen
 import com.segunfrancis.home.ui.CategoryDetailsScreen
 import com.segunfrancis.home.ui.HomeScreen
 import com.segunfrancis.local.AppTheme
-import com.segunfrancis.author.ui.AuthorScreen
 import com.segunfrancis.settings.ui.SettingsScreen
 import com.segunfrancis.theme.WallpaperDownloaderTheme
 import kotlinx.serialization.Serializable
@@ -83,9 +83,10 @@ fun WallpaperDownloaderApp() {
     val currentDestination = navBackStackEntry?.destination
 
     Scaffold(modifier = Modifier.fillMaxSize(), bottomBar = {
-        if (currentDestination?.hierarchy?.any { it.hasRoute(AppDestinations.Home::class) } == true
-            || currentDestination?.hierarchy?.any { it.hasRoute(AppDestinations.Favourites::class) } == true
-            || currentDestination?.hierarchy?.any { it.hasRoute(AppDestinations.Author::class) } == true) {
+        if (currentDestination?.hierarchy?.any { it.hasRoute(AppDestinations.Home::class) } == true ||
+            currentDestination?.hierarchy?.any { it.hasRoute(AppDestinations.Favourites::class) } == true ||
+            currentDestination?.hierarchy?.any { it.hasRoute(AppDestinations.Author::class) } == true
+        ) {
             NavigationBar(modifier = Modifier.fillMaxWidth()) {
                 NavMenuItems.entries.forEach { menuItem ->
                     NavigationBarItem(
@@ -120,15 +121,15 @@ fun WallpaperDownloaderApp() {
                 HomeScreen(onCategoryClick = {
                     navController.navigate(AppDestinations.CategoryDetails(it))
                 }, onMenuActionClick = {
-                    navController.navigate(AppDestinations.Settings)
-                })
+                        navController.navigate(AppDestinations.Settings)
+                    })
             }
             composable<AppDestinations.Author> {
                 AuthorScreen(onMenuActionClick = {
                     navController.navigate(AppDestinations.Settings)
                 }, onAuthorClick = { username ->
-                    navController.navigate(AppDestinations.AuthorDetails(username))
-                })
+                        navController.navigate(AppDestinations.AuthorDetails(username))
+                    })
             }
             composable<AppDestinations.Favourites> {
                 FavouriteScreen(
@@ -149,7 +150,8 @@ fun WallpaperDownloaderApp() {
                     navigateBack = { navController.navigateUp() },
                     onPhotoClick = { id ->
                         navController.navigate(AppDestinations.Details(id))
-                    })
+                    }
+                )
             }
             composable<AppDestinations.Details> {
                 DetailsScreen(
@@ -189,7 +191,7 @@ enum class NavMenuItems(
 ) {
     HOME("Home", Icons.Default.Home, AppDestinations.Home),
     FAVORITES("Favorites", Icons.Default.Favorite, AppDestinations.Favourites),
-    PROFILE("Authors", Icons.Default.AccountBox, AppDestinations.Author),
+    PROFILE("Authors", Icons.Default.AccountBox, AppDestinations.Author)
 }
 
 sealed class AppDestinations {

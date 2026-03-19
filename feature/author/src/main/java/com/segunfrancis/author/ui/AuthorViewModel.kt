@@ -50,5 +50,5 @@ internal class AuthorViewModel(private val repository: AuthorRepository) : ViewM
 }
 
 sealed class AuthorActions {
-    data class ShowError(val errorMessage: String?): AuthorActions()
+    data class ShowError(val errorMessage: String?) : AuthorActions()
 }

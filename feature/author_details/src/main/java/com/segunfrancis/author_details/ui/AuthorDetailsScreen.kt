@@ -142,7 +142,8 @@ fun AuthorDetailsContent(
                     Spacer(modifier = Modifier.height(16.dp))
                     if (bio.isNotBlank()) {
                         Text(
-                            text = bio, modifier = Modifier
+                            text = bio,
+                            modifier = Modifier
                                 .fillMaxWidth(),
                             style = MaterialTheme.typography.bodyLarge
                         )

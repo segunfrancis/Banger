@@ -127,7 +127,8 @@ fun AuthorContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         AsyncImage(
-                            model = it.profilePhoto, contentDescription = it.name,
+                            model = it.profilePhoto,
+                            contentDescription = it.name,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
@@ -148,7 +149,8 @@ fun AuthorContent(
                             )
                             Spacer(Modifier.height(4.dp))
                             Text(
-                                text = it.username, style = MaterialTheme.typography.labelSmall,
+                                text = it.username,
+                                style = MaterialTheme.typography.labelSmall,
                                 overflow = TextOverflow.Ellipsis,
                                 maxLines = 1
                             )
