@@ -22,6 +22,9 @@ datastore-version = "1.1.7"
 appcompat = "1.7.1"
 material = "1.12.0"
 ktlint-gradle = "11.6.1"
+coroutinesTest = "1.10.2"
+truth = "1.4.5"
+turbine = "1.2.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -54,6 +57,9 @@ room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomKtx" 
 preference-datastore = {  group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore-version"}
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
+truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
+turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
