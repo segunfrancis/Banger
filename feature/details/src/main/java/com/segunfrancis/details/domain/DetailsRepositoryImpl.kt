@@ -14,9 +14,9 @@ import com.segunfrancis.details.domain.data.DetailsApi
 import com.segunfrancis.local.PhotoForCaching
 import com.segunfrancis.local.WDDao
 import com.segunfrancis.remote.DownloadResponse
+import com.segunfrancis.remote.PhotosResponseItem
 import com.segunfrancis.utility.BlurHashDecoder
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -29,13 +29,19 @@ class DetailsRepositoryImpl(
     private val context: Context,
     private val dao: WDDao
 ) : DetailsRepository {
-    @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun getPhotoDetails(id: String): Result<Flow<DetailPhoto?>> {
         return try {
             Result.success(
-                dao.getPhotoById(id).map {
-                    Log.d("getPhotoDetails", "PhotoForCaching: $it")
-                    it.toDetailPhoto()
+                dao.getPhotoById(id).map { cachedPhoto ->
+                    Log.d("getPhotoDetails", "PhotoForCaching: $cachedPhoto")
+                    val localDetail = cachedPhoto.toDetailPhoto()
+                    if (localDetail.isValidForDetails()) {
+                        localDetail
+                    } else {
+                        val remoteDetail = api.getPhotoDetails(id)
+                        val isFavourite = cachedPhoto?.photosResponseEntity?.isFavourite ?: false
+                        remoteDetail.toDetailPhoto(isFavourite)
+                    }
                 }.flowOn(dispatcher)
             )
         } catch (t: Throwable) {
@@ -128,6 +134,38 @@ class DetailsRepositoryImpl(
             t.printStackTrace()
             Result.failure(t)
         }
+    }
+
+    private fun DetailPhoto?.isValidForDetails(): Boolean {
+        return this != null &&
+            username.isNotBlank() &&
+            name.isNotBlank() &&
+            photoUrl.isNotBlank()
+    }
+
+    private fun PhotosResponseItem.toDetailPhoto(isFavourite: Boolean): DetailPhoto {
+        return DetailPhoto(
+            id = id,
+            description = description,
+            blurHash = blurHash,
+            thumb = urls.thumb,
+            altDescription = altDescription,
+            height = height,
+            width = width,
+            likes = likes,
+            isFavourite = isFavourite,
+            blurHashBitmap = BlurHashDecoder.decode(
+                blurHash = blurHash,
+                width = width.div(100),
+                height = height.div(100)
+            ),
+            username = user.username,
+            name = user.name,
+            photoUrl = urls.regular,
+            bio = user.bio.orEmpty(),
+            profileImage = user.profileImage.large,
+            downloadLocation = links.downloadLocation.orEmpty()
+        )
     }
 
     private fun PhotoForCaching?.toDetailPhoto(): DetailPhoto? {
