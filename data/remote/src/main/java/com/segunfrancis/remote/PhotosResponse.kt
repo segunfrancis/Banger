@@ -93,7 +93,7 @@ data class UserPhotosResponse(
     val id: String,
     val width: Int,
     val height: Int,
-    @SerialName("blur_hash") val blurHash: String,
+    @SerialName("blur_hash") val blurHash: String?,
     val urls: Urls,
     val likes: Int,
     val description: String?,
