@@ -74,7 +74,7 @@ class DetailsViewModelTest {
         }
 
         override suspend fun downloadImage(url: String): Result<Uri?> {
-            return Result.success(Uri.parse("content://image/$url"))
+            return Result.success(null)
         }
 
         override suspend fun setHomeLockScreenFromUri(
