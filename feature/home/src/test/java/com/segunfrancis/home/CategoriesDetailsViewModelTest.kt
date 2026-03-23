@@ -11,7 +11,6 @@ import com.segunfrancis.remote.PhotoOrientation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestDispatcher
@@ -56,20 +55,18 @@ class CategoriesDetailsViewModelTest {
 
     @Test
     fun `getPhotos emits action on refresh failure when existing data exists`() = runTest {
-        val flow = MutableSharedFlow<List<HomePhoto>>()
-        val repository = FakeHomeRepository(flow)
+        val repository = FakeHomeRepository(
+            flow {
+                emit(listOf(samplePhoto("1")))
+                throw Throwable("network unavailable")
+            }
+        )
         val viewModel = CategoriesDetailsViewModel(
             repository = repository,
             savedStateHandle = SavedStateHandle(mapOf("category" to "nature"))
         )
 
         viewModel.action.test {
-            flow.emit(listOf(samplePhoto("1")))
-            advanceUntilIdle()
-
-            flow.emit(emptyList())
-            repository.emitError(Throwable("network unavailable"))
-            viewModel.getPhotos()
             advanceUntilIdle()
 
             val event = awaitItem() as CategoriesDetailsActions.ShowError
@@ -78,11 +75,6 @@ class CategoriesDetailsViewModelTest {
     }
 
     private class FakeHomeRepository(private val photosFlow: Flow<List<HomePhoto>>) : HomeRepository {
-        private var forceFailure: Throwable? = null
-
-        fun emitError(throwable: Throwable) {
-            forceFailure = throwable
-        }
 
         override suspend fun getPhotos(): Result<List<HomePhoto>> = Result.success(emptyList())
 
@@ -94,13 +86,7 @@ class CategoriesDetailsViewModelTest {
         override suspend fun getPhotos(
             query: String,
             orientation: PhotoOrientation
-        ): Flow<List<HomePhoto>> {
-            forceFailure?.let { throwable ->
-                forceFailure = null
-                return flow { throw throwable }
-            }
-            return photosFlow
-        }
+        ): Flow<List<HomePhoto>> = photosFlow
     }
 
     private fun samplePhoto(id: String) = HomePhoto(
