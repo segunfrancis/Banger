@@ -66,7 +66,7 @@ class DetailsViewModelTest {
 
     private class FakeDetailsRepository : DetailsRepository {
         override suspend fun getPhotoDetails(id: String): Result<Flow<DetailPhoto?>> {
-            return Result.success(flowOf(sampleDetailPhoto(id)))
+            return Result.success(flowOf(createSampleDetailPhoto(id)))
         }
 
         override suspend fun trackDownload(id: String): Result<DownloadResponse> {
@@ -82,27 +82,32 @@ class DetailsViewModelTest {
             option: WallpaperOption
         ): Result<Unit> = Result.success(Unit)
 
-        override suspend fun updateFavouriteStatus(photoId: String, isFavourite: Boolean): Result<Unit> {
+        override suspend fun updateFavouriteStatus(
+            photoId: String,
+            isFavourite: Boolean
+        ): Result<Unit> {
             return Result.success(Unit)
         }
     }
 
-    private fun sampleDetailPhoto(id: String) = DetailPhoto(
-        id = id,
-        description = "description",
-        blurHash = null,
-        thumb = "thumb",
-        blurHashBitmap = null,
-        altDescription = "alt",
-        height = 100,
-        width = 100,
-        likes = 1,
-        isFavourite = false,
-        profileImage = "profile",
-        username = "john",
-        name = "John",
-        photoUrl = "photo",
-        bio = "bio",
-        downloadLocation = "loc"
-    )
+    companion object {
+        private fun createSampleDetailPhoto(id: String) = DetailPhoto(
+            id = id,
+            description = "description",
+            blurHash = null,
+            thumb = "thumb",
+            blurHashBitmap = null,
+            altDescription = "alt",
+            height = 100,
+            width = 100,
+            likes = 1,
+            isFavourite = false,
+            profileImage = "profile",
+            username = "john",
+            name = "John",
+            photoUrl = "photo",
+            bio = "bio",
+            downloadLocation = "loc"
+        )
+    }
 }
